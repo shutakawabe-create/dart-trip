@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ダーツの旅 スポット帳</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{
+  --bg:#f6f1e7; --card:#fffdf8; --ink:#2a2420; --sub:#6d635a; --line:#e3d9c8;
+  --accent:#c8442f; --accent-ink:#fff; --chip:#efe6d6;
+  --c-kanko:#2f7d5b; --c-meshi:#c8442f; --c-onsen:#2f6fa8; --c-shugo:#8a4bb0; --c-car:#b07a12; --c-etc:#6d635a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
+    --accent:#e2664f; --accent-ink:#fff; --chip:#332d27;
+    --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-shugo:#b27ad6; --c-car:#d9a43a; --c-etc:#b3a898;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
+  --accent:#e2664f; --accent-ink:#fff; --chip:#332d27;
+  --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-shugo:#b27ad6; --c-car:#d9a43a; --c-etc:#b3a898;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+a{color:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 96px}
+header{padding:18px 0 10px}
+h1{font-size:22px;margin:0;letter-spacing:.02em}
+h1 span{color:var(--accent)}
+.meta{color:var(--sub);font-size:13px;margin-top:2px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:14px;text-decoration:none;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.small{padding:5px 10px;font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.box h2{font-size:14px;margin:0 0 8px;color:var(--sub);font-weight:600}
+.return{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.return b{font-size:18px}
+.cars{display:grid;gap:8px}
+.car{border-left:4px solid var(--c-car);padding:4px 0 4px 10px}
+.car .t{color:var(--sub);font-size:12px}
+.shugo{border-left-color:var(--c-shugo)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;font-family:inherit}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#map{height:46vh;min-height:260px;border-radius:14px;border:1px solid var(--line);margin:8px 0;z-index:0}
+#map.hidden{display:none}
+.cards{display:grid;gap:10px;margin-top:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.card.focus{outline:2px solid var(--accent)}
+.card h3{font-size:16px;margin:0 0 2px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.tag{font-size:12px;font-weight:600;color:#fff;border-radius:6px;padding:1px 7px;flex:none}
+.card .desc{margin:4px 0}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:6px 0;font-size:13px}
+.card dt{color:var(--sub)}
+.card dd{margin:0;overflow-wrap:anywhere}
+.card .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.card .by{color:var(--sub);font-size:12px}
+.dist{color:var(--sub);font-size:13px;font-weight:400}
+.note{color:var(--sub);font-size:13px}
+.err{background:#fde8e4;color:#7a1f10;border-color:#f3b8ab}
+.empty{text-align:center;color:var(--sub);padding:28px 0}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:1000;box-shadow:0 4px 14px rgba(0,0,0,.25);padding:12px 18px;font-size:15px}
+.pin{width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.me{width:16px;height:16px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,115,232,.35)}
+.leaflet-popup-content{font-size:14px}
+details summary{cursor:pointer;color:var(--sub);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎯 ダーツの旅 <span>スポット帳</span></h1>
+    <div class="meta">
+      <span id="updated">読み込み中…</span>
+      <button class="btn small" id="reload">↻ 更新</button>
+    </div>
+  </header>
+
+  <div class="box return">
+    <div>
+      <div class="note">西千葉駅 22:00着まで</div>
+      <b id="left">--</b>
+    </div>
+    <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=%E8%A5%BF%E5%8D%83%E8%91%89%E9%A7%85&travelmode=driving">🚗 西千葉駅までの時間を見る</a>
+  </div>
+
+  <div id="msg"></div>
+
+  <div class="box" id="carBox" hidden>
+    <h2>📍 集合・各車の状況</h2>
+    <div class="cars" id="cars"></div>
+  </div>
+
+  <div class="chips" id="chips" role="toolbar" aria-label="種類で絞り込み"></div>
+  <div class="row">
+    <button class="btn small" id="sortBtn">並び：新しい順</button>
+    <button class="btn small" id="mapBtn">地図を隠す</button>
+  </div>
+  <div id="map"></div>
+  <div class="cards" id="list"></div>
+
+  <details class="box" style="margin-top:20px">
+    <summary>使い方</summary>
+    <p class="note">・右下の「＋ 追加する」から、見つけたお店や観光地を送れます（ログイン不要）。<br>
+    ・場所には住所かGoogleマップのリンクを貼ってください。住所なら地図にピンが立ちます。<br>
+    ・車の現在地や行き先は、種類で「車の現在地・行き先」を選んで、「追加した人・車」に号車を書くと上に表示されます。<br>
+    ・ページは1分ごとに自動で最新の内容になります。</p>
+  </details>
+</div>
+<a class="btn primary fab" id="addBtn" target="_blank" rel="noopener" hidden>＋ 追加する</a>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+/* ===== 設定 ===== */
+const SHEET_ID = "16sbgEbDFIKZPAaduDGUpj8yQIkxpd27yWyjFr2yTsCM";
+const SHEETS   = ["スポット", "フォームの回答 1"];   // 読み込むタブ名（無いタブは無視）
+const FORM_URL = "";                                  // Googleフォームの回答用URLを入れる
+const GOAL_HOUR = 22;
+/* ================ */
+
+const TYPES = [
+  {key:"観光", label:"観光", color:"--c-kanko", match:/観光|景|寺|神社|公園|名所|見/},
+  {key:"飯",   label:"飯",   color:"--c-meshi", match:/飯|食|ご?はん|店|カフェ|ラーメン|グルメ|居酒屋/},
+  {key:"温泉", label:"温泉", color:"--c-onsen", match:/温泉|風呂|湯|銭湯|サウナ/},
+  {key:"集合", label:"集合場所", color:"--c-shugo", match:/集合/},
+  {key:"車",   label:"車",   color:"--c-car",   match:/車/},
+  {key:"他",   label:"その他", color:"--c-etc", match:/./},
+];
+const FIELDS = {
+  time:/タイムスタンプ|日時|時刻/, name:/名前|店名|スポット/, type:/種類|ジャンル/,
+  place:/場所|住所/, lat:/緯度|lat/i, lng:/経度|lng|lon/i, desc:/ひとこと|コメント|メモ|説明/,
+  price:/値段|価格|予算/, hours:/営業/, group:/団体/, by:/追加|車|誰/, url:/URL|リンク/i,
+};
+
+const $ = s => document.querySelector(s);
+const cssVar = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+};
+
+let rows = [], filter = "all", sortNear = false, me = null, map, layer, meMarker;
+const geoCache = store.get("geoCache") || {};
+
+/* CSV */
+function parseCSV(text){
+  const out = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (q){
+      if (c === '"'){ if (text[i+1] === '"'){ cur += '"'; i++; } else q = false; }
+      else cur += c;
+    } else if (c === '"') q = true;
+    else if (c === ','){ row.push(cur); cur = ""; }
+    else if (c === '\n'){ row.push(cur); out.push(row); row = []; cur = ""; }
+    else if (c !== '\r') cur += c;
+  }
+  if (cur !== "" || row.length){ row.push(cur); out.push(row); }
+  return out;
+}
+
+function toObjects(table){
+  if (!table.length) return [];
+  const head = table[0];
+  const idx = {};
+  for (const [k, re] of Object.entries(FIELDS)){
+    const i = head.findIndex((h, j) => re.test(h) && !Object.values(idx).includes(j));
+    if (i >= 0) idx[k] = i;
+  }
+  return table.slice(1).map(r => {
+    const o = {};
+    for (const k in FIELDS) o[k] = idx[k] != null ? (r[idx[k]] || "").trim() : "";
+    return o;
+  }).filter(o => o.name || o.place);
+}
+
+function typeOf(t){ return TYPES.find(T => T.match.test(t || "")) || TYPES[TYPES.length-1]; }
+
+function coordsFrom(o){
+  const la = parseFloat(o.lat), ln = parseFloat(o.lng);
+  if (isFinite(la) && isFinite(ln)) return [la, ln];
+  const s = (o.place + " " + o.url);
+  const m = s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || s.match(/[?&](?:q|query|destination|ll)=(-?\d+\.\d+)(?:,|%2C)(-?\d+\.\d+)/) || s.match(/^\s*(-?\d{2}\.\d+)\s*[, ]\s*(-?\d{3}\.\d+)/);
+  if (m) return [parseFloat(m[1]), parseFloat(m[2])];
+  if (geoCache[o.place]) return geoCache[o.place];
+  return null;
+}
+
+async function geocodeMissing(){
+  const todo = [...new Set(rows.filter(o => !o.ll && o.place && !/^https?:/.test(o.place) && !(o.place in geoCache)).map(o => o.place))];
+  for (const p of todo){
+    try{
+      const r = await fetch("https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + encodeURIComponent(p));
+      const j = await r.json();
+      geoCache[p] = (j && j[0]) ? [j[0].geometry.coordinates[1], j[0].geometry.coordinates[0]] : 0;
+    }catch(e){ geoCache[p] = 0; }
+    store.set("geoCache", geoCache);
+    await new Promise(r => setTimeout(r, 300));
+  }
+  if (todo.length){ rows.forEach(o => o.ll = o.ll || coordsFrom(o) || null); render(); }
+}
+
+async function load(){
+  $("#updated").textContent = "読み込み中…";
+  const all = []; let ok = 0;
+  for (const name of SHEETS){
+    try{
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(name)}&_=${Date.now()}`;
+      const r = await fetch(url);
+      if (!r.ok) continue;
+      const text = await r.text();
+      if (/^\s*</.test(text)) continue;           // HTML（非公開など）
+      ok++;
+      all.push(...toObjects(parseCSV(text)).map(o => ({...o, src:name})));
+    }catch(e){}
+  }
+  if (!ok){
+    $("#msg").innerHTML = `<div class="box err">スプレッドシートを読み込めませんでした。共有設定が「リンクを知っている全員（閲覧者）」になっているか確認してください。</div>`;
+    $("#updated").textContent = "読み込み失敗";
+    return;
+  }
+  $("#msg").innerHTML = "";
+  all.forEach((o, i) => { o.id = i; o.t = typeOf(o.type); o.ll = coordsFrom(o); o.ts = Date.parse((o.time||"").replace(/\//g,"-").replace(" ","T")) || 0; });
+  rows = all;
+  $("#updated").textContent = "最終更新 " + new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"});
+  render();
+  geocodeMissing();
+}
+
+function km(a, b){
+  const R = 6371, r = x => x * Math.PI / 180;
+  const d1 = r(b[0]-a[0]), d2 = r(b[1]-a[1]);
+  const h = Math.sin(d1/2)**2 + Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(d2/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function navUrl(o){
+  const dest = o.ll ? o.ll.join(",") : (o.place || o.name);
+  return "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + encodeURIComponent(dest);
+}
+function gmapUrl(o){
+  if (/^https?:/.test(o.place)) return o.place;
+  if (/^https?:/.test(o.url) && /google|goo\.gl/.test(o.url)) return o.url;
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.ll ? o.ll.join(",") : (o.name + " " + o.place));
+}
+function timeLabel(o){
+  if (!o.ts) return o.time || "";
+  return new Date(o.ts).toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"});
+}
+
+function renderChips(){
+  const counts = {};
+  rows.forEach(o => counts[o.t.key] = (counts[o.t.key]||0) + 1);
+  const list = [{key:"all", label:"すべて"}, ...TYPES.filter(T => T.key !== "車" && counts[T.key])];
+  $("#chips").innerHTML = list.map(T =>
+    `<button class="chip" data-k="${T.key}" aria-pressed="${filter===T.key}">${T.label}${T.key==="all" ? "" : " " + counts[T.key]}</button>`).join("");
+}
+
+function renderCars(){
+  const latest = {};
+  rows.filter(o => o.t.key === "車").forEach(o => {
+    const k = o.by || o.name;
+    if (!latest[k] || o.ts >= latest[k].ts) latest[k] = o;
+  });
+  const shugo = rows.filter(o => o.t.key === "集合").sort((a,b) => b.ts - a.ts).slice(0, 1);
+  const items = [...shugo, ...Object.values(latest).sort((a,b) => (a.by||a.name).localeCompare(b.by||b.name, "ja", {numeric:true}))];
+  $("#carBox").hidden = !items.length;
+  $("#cars").innerHTML = items.map(o => `
+    <div class="car ${o.t.key==="集合" ? "shugo" : ""}">
+      <div><b>${o.t.key==="集合" ? "🚩 " + esc(o.name) : "🚗 " + esc(o.by || o.name)}</b> <span class="t">${esc(timeLabel(o))}</span></div>
+      <div>${esc(o.desc)}</div>
+      <div class="row" style="margin-top:4px">
+        <span class="note">${esc(/^https?:/.test(o.place) ? "" : o.place)}</span>
+        <a class="btn small" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a>
+        ${o.ll ? `<button class="btn small" data-show="${o.id}">地図</button>` : ""}
+      </div>
+    </div>`).join("");
+}
+
+function visible(){
+  let v = rows.filter(o => o.t.key !== "車" && (filter === "all" || o.t.key === filter));
+  if (sortNear && me) v.sort((a,b) => (a.ll ? km(me, a.ll) : 1e9) - (b.ll ? km(me, b.ll) : 1e9));
+  else v.sort((a,b) => b.ts - a.ts || b.id - a.id);
+  return v;
+}
+
+function renderList(v){
+  if (!v.length){ $("#list").innerHTML = `<div class="empty">まだスポットがありません。<br>見つけたら「＋ 追加する」から送ってください。</div>`; return; }
+  $("#list").innerHTML = v.map(o => {
+    const d = (me && o.ll) ? `<span class="dist">約${km(me, o.ll).toFixed(1)}km</span>` : "";
+    const info = [["値段",o.price],["営業",o.hours],["団体",o.group],["場所",/^https?:/.test(o.place) ? "" : o.place]].filter(x => x[1]);
+    const link = /^https?:/.test(o.url) ? `<a class="btn small" target="_blank" rel="noopener" href="${esc(o.url)}">詳細</a>` : "";
+    return `<article class="card" id="c${o.id}">
+      <h3><span class="tag" style="background:${cssVar(o.t.color)}">${o.t.label}</span>${esc(o.name)} ${d}</h3>
+      ${o.desc ? `<div class="desc">${esc(o.desc)}</div>` : ""}
+      ${info.length ? `<dl>${info.map(([k,x]) => `<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>` : ""}
+      <div class="foot">
+        <span class="by">${esc(o.by)}${o.by && timeLabel(o) ? "・" : ""}${esc(timeLabel(o))}</span>
+        <span class="row">
+          ${o.ll ? `<button class="btn small" data-show="${o.id}">地図</button>` : ""}
+          <a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(o))}">Googleマップ</a>
+          ${link}
+          <a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a>
+        </span>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function pinIcon(color){
+  return L.divIcon({className:"", html:`<div class="pin" style="background:${color}"></div>`, iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-24]});
+}
+const markers = {};
+function renderMap(v){
+  if (!window.L) return;
+  if (!map){
+    map = L.map("map", {zoomControl:true}).setView([35.75, 139.9], 8);
+    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {maxZoom:18, attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>'}).addTo(map);
+    layer = L.layerGroup().addTo(map);
+  }
+  layer.clearLayers();
+  const pts = [];
+  const cars = rows.filter(o => o.t.key === "車" || o.t.key === "集合");
+  [...v, ...cars.filter(o => !v.includes(o))].forEach(o => {
+    if (!o.ll) return;
+    const m = L.marker(o.ll, {icon:pinIcon(cssVar(o.t.color))})
+      .bindPopup(`<b>${esc(o.t.key==="車" ? (o.by||o.name) : o.name)}</b><br>${esc(o.desc)}<br><a target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a>`)
+      .on("click", () => { const c = $("#c"+o.id); if (c){ document.querySelectorAll(".card.focus").forEach(e => e.classList.remove("focus")); c.classList.add("focus"); } });
+    m.addTo(layer); markers[o.id] = m; pts.push(o.ll);
+  });
+  if (me) pts.push(me);
+  if (!map._fitted && pts.length){ map.fitBounds(pts, {padding:[30,30], maxZoom:14}); map._fitted = true; }
+}
+
+function render(){
+  renderChips(); renderCars();
+  const v = visible();
+  renderList(v); renderMap(v);
+}
+
+function updateLeft(){
+  const now = new Date(), goal = new Date(now); goal.setHours(GOAL_HOUR, 0, 0, 0);
+  const min = Math.round((goal - now) / 60000);
+  $("#left").textContent = min > 0 ? `あと ${Math.floor(min/60)}時間${min%60}分` : "22:00を過ぎています";
+}
+
+/* events */
+$("#chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; filter = b.dataset.k; map && (map._fitted = false); render(); });
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-show]"); if (!b) return;
+  const o = rows.find(r => r.id == b.dataset.show); if (!o || !o.ll || !map) return;
+  $("#map").classList.remove("hidden"); $("#mapBtn").textContent = "地図を隠す"; map.invalidateSize();
+  map.setView(o.ll, 15); markers[o.id] && markers[o.id].openPopup();
+  $("#map").scrollIntoView({behavior:"smooth", block:"center"});
+});
+$("#reload").onclick = load;
+$("#mapBtn").onclick = () => {
+  const h = $("#map").classList.toggle("hidden");
+  $("#mapBtn").textContent = h ? "地図を出す" : "地図を隠す";
+  if (!h && map) map.invalidateSize();
+};
+$("#sortBtn").onclick = () => {
+  if (sortNear){ sortNear = false; $("#sortBtn").textContent = "並び：新しい順"; render(); return; }
+  if (!navigator.geolocation){ alert("この端末では現在地が使えません"); return; }
+  $("#sortBtn").textContent = "現在地を取得中…";
+  navigator.geolocation.getCurrentPosition(p => {
+    me = [p.coords.latitude, p.coords.longitude]; sortNear = true;
+    $("#sortBtn").textContent = "並び：近い順";
+    if (map){
+      meMarker && meMarker.remove();
+      meMarker = L.marker(me, {icon:L.divIcon({className:"", html:'<div class="me"></div>', iconSize:[16,16], iconAnchor:[8,8]})}).addTo(map).bindPopup("現在地");
+    }
+    render();
+  }, () => { $("#sortBtn").textContent = "並び：新しい順"; alert("現在地を取得できませんでした（位置情報の許可を確認してください）"); }, {enableHighAccuracy:true, timeout:10000});
+};
+if (FORM_URL){ $("#addBtn").href = FORM_URL; $("#addBtn").hidden = false; }
+
+updateLeft(); setInterval(updateLeft, 30000);
+load(); setInterval(() => { if (!document.hidden) load(); }, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+</script>
+</body>
+</html>
