@@ -33,9 +33,12 @@ function doPost(e) {
   const row = clean(req.row || {});
   if (req.sheet === 'スポット' && !(row['緯度'] && row['経度']) &&
       (req.action === 'append' || row['住所'] || row['GoogleマップURL'])) {
-    const ll = locate(row);
+    const found = {};
+    const ll = locate(row, found);
     if (ll) { row['緯度'] = ll[0]; row['経度'] = ll[1]; }
+    if (!row['名前'] && found.name) row['名前'] = found.name;   // リンクだけのときは店名も入れる
   }
+  if (req.sheet === 'スポット' && req.action === 'append' && !row['名前']) row['名前'] = 'Googleマップのスポット';
 
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -106,23 +109,34 @@ function clean(row) {
 }
 
 // GoogleマップのURL、住所、名前の順に位置（緯度・経度）を探す
-function locate(row) {
+function locate(row, found) {
+  found = found || {};
   const url = row['GoogleマップURL'] || '';
   if (/^https?:\/\//.test(url)) {
     try {
       let u = url;
       for (let i = 0; i < 5; i++) {
+        const pn = placeName(u);
+        if (pn) found.name = pn;
         const ll = parseLL(u);
         if (ll) return ll;
         const res = UrlFetchApp.fetch(u, { followRedirects: false, muteHttpExceptions: true });
         const h = res.getHeaders();
         const next = h['Location'] || h['location'];
-        if (!next) { const b = parseLL(res.getContentText().slice(0, 300000)); if (b) return b; break; }
+        if (!next) {
+          const body = res.getContentText().slice(0, 300000);
+          if (!found.name) {
+            const t = body.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/) || body.match(/<title>([^<]+)<\/title>/);
+            if (t) found.name = t[1].replace(/\s*[-·]\s*Google\s*(マップ|Maps).*$/, '').trim();
+          }
+          const b = parseLL(body); if (b) return b; break;
+        }
         u = next;
       }
     } catch (err) {}
   }
-  const queries = [row['住所'], row['名前'] && row['住所'] ? row['名前'] + ' ' + row['住所'] : '', row['名前']].filter(Boolean);
+  const nameQ = row['名前'] || found.name;
+  const queries = [row['住所'], nameQ && row['住所'] ? nameQ + ' ' + row['住所'] : '', nameQ].filter(Boolean);
   for (let i = 0; i < queries.length; i++) {
     try {
       const g = Maps.newGeocoder().setLanguage('ja').setRegion('jp')
@@ -134,6 +148,13 @@ function locate(row) {
     } catch (err) {}
   }
   return null;
+}
+
+// URLの /maps/place/店名/ の部分から店名を取り出す
+function placeName(s) {
+  const m = String(s).match(/\/maps\/place\/([^/@?]+)/);
+  if (!m) return '';
+  try { return decodeURIComponent(m[1].replace(/\+/g, ' ')).trim(); } catch (err) { return ''; }
 }
 
 function parseLL(s) {

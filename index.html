@@ -4,24 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ダーツの旅 スポット帳</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <style>
 :root{
   --bg:#f6f1e7; --card:#fffdf8; --ink:#2a2420; --sub:#6d635a; --line:#e3d9c8;
   --accent:#c8442f; --accent-ink:#fff; --chip:#efe6d6; --ok:#2f7d5b; --okbg:#e3f2ea; --want:#b0571f; --wantbg:#fbeadd;
-  --c-kanko:#2f7d5b; --c-meshi:#c8442f; --c-onsen:#2f6fa8; --c-kai:#b07a12; --c-etc:#6d635a;
+  --c-kanko:#2f7d5b; --c-meshi:#c8442f; --c-leisure:#2f6fa8; --c-etc:#6d635a;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
     --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329; --want:#eb9a62; --wantbg:#3a2a1e;
-    --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-kai:#d9a43a; --c-etc:#9a8f82;
+    --c-kanko:#4fb489; --c-meshi:#e2664f; --c-leisure:#5a9ad6; --c-etc:#9a8f82;
   }
 }
 :root[data-theme="dark"]{
   --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
   --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329; --want:#eb9a62; --wantbg:#3a2a1e;
-  --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-kai:#d9a43a; --c-etc:#9a8f82;
+  --c-kanko:#4fb489; --c-meshi:#e2664f; --c-leisure:#5a9ad6; --c-etc:#9a8f82;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -29,117 +28,107 @@ html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
 a{color:inherit}
 .wrap{max-width:720px;margin:0 auto;padding:0 16px 110px}
-header{padding:16px 0 6px}
-h1{font-size:22px;margin:0;letter-spacing:.02em}
+header{padding:14px 0 4px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+h1{font-size:18px;margin:0;letter-spacing:.02em;white-space:nowrap}
 h1 span{color:var(--accent)}
-.meta{color:var(--sub);font-size:13px;margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.meta{color:var(--sub);font-size:12px;display:flex;gap:6px;align-items:center;flex:none}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:14px;text-decoration:none;cursor:pointer;font-family:inherit;white-space:nowrap;line-height:1.3}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
 .btn.small{padding:6px 11px;font-size:13px}
-.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .note{color:var(--sub);font-size:13px}
 .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
 .err{background:#fde8e4;color:#7a1f10;border-color:#f3b8ab}
 
-/* 目的地 */
+/* 目的地と地図 */
 .dest{border:0;padding:0;overflow:hidden;background:linear-gradient(135deg,#6a1fc2,#c8442f);color:#fff;box-shadow:0 6px 20px rgba(106,31,194,.3)}
-.dest .in{padding:16px 16px 14px}
-.dest .lbl{font-weight:700;font-size:14px;letter-spacing:.08em;opacity:.95}
-.dest h2{margin:4px 0 6px;font-size:30px;line-height:1.25;letter-spacing:.02em}
+.dest .in{padding:14px 16px 12px}
+.dest .lbl{font-weight:700;font-size:13px;letter-spacing:.08em;opacity:.95}
+.dest h2{margin:2px 0 4px;font-size:28px;line-height:1.25;letter-spacing:.02em}
 .dest .sub2{opacity:.9;font-size:14px}
 .dest .btn{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.45);color:#fff}
-.dest .btn.go{background:#fff;color:#6a1fc2;border-color:#fff;font-weight:700;font-size:16px;padding:10px 22px}
-.dest iframe{display:block;width:100%;height:240px;border:0}
-.dest.wait{text-align:center;padding:24px 16px}
-.dest.wait h2{font-size:21px}
+.dest iframe{display:block;width:100%;height:250px;border:0;background:#ddd}
+.dest .focusbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,0,0,.25);font-size:14px}
+.dest .focusbar b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dest.wait{text-align:center;padding:22px 16px}
+.dest.wait h2{font-size:20px}
 
 /* タブ・絞り込み */
-.tabs{display:flex;gap:4px;background:var(--chip);border-radius:12px;padding:4px;margin:14px 0 8px;position:sticky;top:0;z-index:500}
+.tabs{display:flex;gap:4px;background:var(--chip);border-radius:12px;padding:4px;margin:14px 0 8px;position:sticky;top:0;z-index:50}
 .tab{flex:1;border:0;background:transparent;color:var(--ink);font-family:inherit;font-size:14px;padding:8px 4px;border-radius:9px;cursor:pointer}
 .tab[aria-selected="true"]{background:var(--card);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;font-family:inherit}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-
-/* 地図 */
-#map{height:62vh;min-height:300px;border-radius:14px;border:1px solid var(--line);z-index:0}
-.pin{width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
-.pin i{transform:rotate(45deg);font-style:normal;color:#fff;font-size:13px;font-weight:700}
-.pin.big{width:38px;height:38px}
-.pin.big i{font-size:18px}
-.me{width:16px;height:16px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,115,232,.35)}
-.dest-tip{background:#6a1fc2;color:#fff;border:0;font-weight:700;font-size:13px;padding:3px 8px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.dest-tip::before{border-top-color:#6a1fc2!important}
-.leaflet-popup-content{font-size:14px;margin:10px 12px}
+.sort{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+.sort button{border:0;background:var(--card);color:var(--sub);font-family:inherit;font-size:12px;padding:5px 10px;cursor:pointer}
+.sort button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.group{font-size:12px;color:var(--sub);margin:16px 0 6px;display:flex;align-items:center;gap:8px}
+.group::after{content:"";flex:1;border-top:1px solid var(--line)}
 
 /* カード */
-.cards{display:grid;gap:10px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-.card.focus{outline:2px solid var(--accent)}
-.card h3{font-size:16px;margin:0 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.tag{font-size:12px;font-weight:600;color:#fff;border-radius:6px;padding:1px 7px;flex:none}
-.del{margin-left:auto;border:0;background:none;font-size:15px;cursor:pointer;padding:2px 4px;opacity:.55}
-.x{border:0;background:none;color:var(--sub);font-size:15px;cursor:pointer;padding:0 6px;margin-left:2px;vertical-align:baseline}
-.trash{margin-top:24px}
-.trash .it{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
-.names{display:flex;flex-wrap:wrap;gap:6px}
-.names input{position:absolute;opacity:0;pointer-events:none}
-.names label{margin:0;color:var(--ink);font-size:14px;border:1px solid var(--line);background:var(--chip);border-radius:10px;padding:6px 10px;cursor:pointer}
-.names input:checked+label{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
-.badges{display:flex;gap:6px;flex-wrap:wrap;margin:3px 0}
-.badge{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--sub)}
-.badge.ok{color:var(--ok);border-color:var(--ok);background:var(--okbg);font-weight:600}
-.badge.want{color:var(--want);border-color:var(--want);background:var(--wantbg);font-weight:600}
-.dist{color:var(--sub);font-size:13px;font-weight:400}
-.desc{margin:4px 0}
-dl{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;margin:6px 0;font-size:13px}
+.cards{display:grid;gap:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 14px;cursor:pointer}
+.card.open{cursor:default;border-color:var(--sub)}
+.card .top{display:flex;gap:8px;align-items:flex-start}
+.card .top .t{flex:1;min-width:0}
+.card h3{font-size:16px;margin:0;line-height:1.4}
+.tag{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:6px;padding:1px 6px;margin-right:6px;vertical-align:2px}
+.card .desc{margin:3px 0 0;color:var(--ink);font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card.open .desc{-webkit-line-clamp:unset}
+.card .who{color:var(--sub);font-size:12px;margin-top:4px}
+.chev{color:var(--sub);font-size:13px;flex:none;padding-top:2px}
+.reacts{display:flex;gap:6px;margin-top:8px}
+.rb{border:1px solid var(--line);background:transparent;color:var(--sub);border-radius:999px;padding:3px 10px;font-size:13px;cursor:pointer;font-family:inherit}
+.rb.on.w{border-color:var(--want);background:var(--wantbg);color:var(--want);font-weight:700}
+.rb.on.g{border-color:var(--ok);background:var(--okbg);color:var(--ok);font-weight:700}
+.more{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0 0 6px;font-size:13px}
 dt{color:var(--sub)} dd{margin:0;overflow-wrap:anywhere}
-.by{color:var(--sub);font-size:12px}
-.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.gmap{width:100%;height:200px;border:0;border-radius:10px;margin-top:8px;display:block}
-.cmts{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;display:grid;gap:3px}
-.cmt{font-size:14px}
+.names-line{font-size:13px;color:var(--sub);margin:2px 0}
+.cmt{font-size:14px;margin:3px 0}
 .cmt b{font-size:13px}
+.x{border:0;background:none;color:var(--sub);font-size:15px;cursor:pointer;padding:0 6px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .empty{text-align:center;color:var(--sub);padding:28px 0}
 
 .log{border-left:3px solid var(--ok);padding:2px 0 2px 10px;margin:10px 0}
 .log .t{color:var(--sub);font-size:12px}
 
+.foot{margin-top:28px;display:grid;gap:10px}
+.me-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.trash .it{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+details summary{cursor:pointer;color:var(--sub);font-size:13px}
+
 /* 追加ボタン・入力画面 */
-.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:1000;box-shadow:0 4px 14px rgba(0,0,0,.25);padding:12px 18px;font-size:15px}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;box-shadow:0 4px 14px rgba(0,0,0,.25);padding:12px 18px;font-size:15px}
 dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--card);color:var(--ink)}
 dialog::backdrop{background:rgba(0,0,0,.45)}
 dialog form{padding:16px}
 dialog h2{margin:0 0 4px;font-size:18px}
 label{display:block;font-size:13px;color:var(--sub);margin:12px 0 4px}
 input[type=text],textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
-textarea{min-height:76px;resize:vertical}
+textarea{min-height:80px;resize:vertical}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg input,.names input{position:absolute;opacity:0;pointer-events:none}
 .seg label{margin:0;color:var(--ink);font-size:14px;border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:7px 13px;cursor:pointer}
 .seg input:checked+label{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.big2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.big2 input{position:absolute;opacity:0;pointer-events:none}
-.big2 label{margin:0;text-align:center;font-size:16px;font-weight:600;color:var(--ink);border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:14px 6px;cursor:pointer}
-.big2 input:checked+label.w{border-color:var(--want);background:var(--wantbg);color:var(--want)}
-.big2 input:checked+label.g{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
-details.more summary{font-size:13px;color:var(--sub);margin-top:12px;cursor:pointer}
+.names{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.names label{margin:0;color:var(--ink);font-size:15px;border:1px solid var(--line);background:var(--chip);border-radius:10px;padding:8px 12px;cursor:pointer}
+.names input:checked+label{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+details.opt summary{margin-top:14px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .dlg-acts{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:16px}
-.hint{font-size:12px;color:var(--sub);margin-top:3px}
-.toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;z-index:2000;max-width:calc(100vw - 32px)}
-details.help summary{cursor:pointer;color:var(--sub);font-size:13px}
+.hint{font-size:12px;color:var(--sub);margin-top:4px}
+.warn{color:var(--accent);font-size:14px;margin-top:8px}
+.toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;z-index:100;max-width:calc(100vw - 32px)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>🎯 ダーツの旅 <span>スポット帳</span></h1>
-    <div class="meta">
-      <span id="updated">読み込み中…</span>
-      <button class="btn small" id="reload">↻ 更新</button>
-      <a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=%E8%A5%BF%E5%8D%83%E8%91%89%E9%A7%85&travelmode=driving">🚗 西千葉駅までのルート</a>
-    </div>
+    <div class="meta"><span id="updated"></span><button class="btn small" id="reload">↻ 更新</button></div>
   </header>
 
   <div id="msg"></div>
@@ -147,54 +136,45 @@ details.help summary{cursor:pointer;color:var(--sub);font-size:13px}
 
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" data-tab="list" aria-selected="true">スポット</button>
-    <button class="tab" role="tab" data-tab="map" aria-selected="false">地図</button>
     <button class="tab" role="tab" data-tab="log" aria-selected="false">行った記録</button>
   </div>
 
   <section id="p-list">
-    <div class="chips" id="chips"></div>
-    <div class="cards" id="list"><div class="empty">読み込み中…<br><span class="note">はじめて開いたときは数秒かかります</span></div></div>
+    <div class="bar">
+      <div class="chips" id="chips"></div>
+      <div class="sort" id="sort">
+        <button data-sort="new" aria-pressed="true">新しい順</button>
+        <button data-sort="near" aria-pressed="false">目的地から近い順</button>
+      </div>
+    </div>
+    <div id="list"><div class="empty">読み込み中…<br><span class="note">はじめて開いたときは数秒かかります</span></div></div>
   </section>
-  <section id="p-map" hidden>
-    <div class="chips" id="mapChips"></div>
-    <div id="map"></div>
-    <p class="note">ピンをタップすると名前が出ます。✓は誰かが行った場所です。</p>
-  </section>
-  <section id="p-log" hidden>
-    <div id="log"></div>
-  </section>
+  <section id="p-log" hidden><div id="log"></div></section>
 
-  <details class="box trash" id="trashBox" hidden>
-    <summary class="note" style="cursor:pointer">🗑 削除したスポット（<span id="trashCount">0</span>）</summary>
-    <div id="trash"></div>
-  </details>
-
-  <details class="box help" style="margin-top:12px">
-    <summary>使い方</summary>
-    <p class="note">
-    ・行った場所や気になる場所は「✍️ 行った・ひとこと」を押して、当てはまるものを選ぶだけ。ひとことや名前は書かなくても送れます。<br>
-    ・見つけた観光地やお店は、右下の「＋ スポット追加」から。名前だけでも登録できます。<br>
-    ・間違えて登録したスポットは 🗑 で消せます。消したスポットは、このすぐ上の「削除したスポット」から元に戻せます。<br>
-    ・ひとことは横の × で消せます（ひとことは元に戻せません）。<br>
-    ・ページは1分ごとに自動で最新になります。</p>
-  </details>
+  <div class="foot">
+    <div class="box me-row"><span id="meLabel" class="note"></span><button class="btn small" id="changeName">名前を変える</button></div>
+    <details class="box trash" id="trashBox" hidden>
+      <summary>🗑 削除したスポット（<span id="trashCount">0</span>）</summary>
+      <div id="trash"></div>
+    </details>
+  </div>
 </div>
 
 <button class="btn primary fab" id="addBtn">＋ スポット追加</button>
 <dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
 /* ===== 設定 ===== */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwof0NenxaySZMovVsrhEXzh2KpOVOLYECS7hjQFtQLn6NPnixA8oUO42z8V-jd6hJp8A/exec";   // Apps Script の「ウェブアプリのURL」を入れる
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwof0NenxaySZMovVsrhEXzh2KpOVOLYECS7hjQFtQLn6NPnixA8oUO42z8V-jd6hJp8A/exec";
+const MEMBERS = ["きな","心乃","たくや","ららばい","ちーちゃん","はやと","英雄","はな","ひろひと","クン=バル","ビショ太","やすゆき","きらり","O,7in7in_321","おちんちんセックス太郎","和","ほだか","Mr.M","孤孤・射精寝"];
+const AI_NAME = "Claude";
 /* ================ */
 const DEMO = !SCRIPT_URL || /[?&]demo/.test(location.search);
 
 const TYPES = [
   {key:"観光", color:"--c-kanko"},
-  {key:"飯",   color:"--c-meshi"},
-  {key:"温泉", color:"--c-onsen"},
-  {key:"買い物・休憩", color:"--c-kai"},
+  {key:"飯", color:"--c-meshi"},
+  {key:"レジャー", color:"--c-leisure"},
   {key:"その他", color:"--c-etc"},
 ];
 const $ = s => document.querySelector(s);
@@ -205,91 +185,81 @@ const store = {
   get(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? d; }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
 };
+const z2 = n => String(n).padStart(2, "0");
+const nowStr = () => { const d = new Date(); return `${d.getFullYear()}/${z2(d.getMonth()+1)}/${z2(d.getDate())} ${z2(d.getHours())}:${z2(d.getMinutes())}`; };
+const parseTs = s => Date.parse((s || "").replace(/\//g, "-").replace(" ", "T")) || 0;
 
-let spots = [], dest = null, comments = [], trashed = [];
-let tab = "list", typeF = "all", nearMe = false, me = null;
-let map, layer, meMarker, fitted = false;
-const markers = {}, openMaps = new Set();
-let myName = store.get("myName", "");
-const MEMBERS = ["きな","心乃","たくや","ららばい","ちーちゃん","はやと","英雄","はな","ひろひと","クン=バル","ビショ太","やすゆき","きらり","O,7in7in_321","おちんちんセックス太郎","和","ほだか","Mr.M","孤孤・射精寝"];
+let raw = null, spots = [], dest = null, comments = [], trashed = [];
+let tab = "list", typeF = "all", sortBy = "new", openId = null, focusId = null;
+let pending = 0, loading = false;
+let me = store.get("myName", "");
 
-/* ---------- お試しモード（この端末の中だけに保存） ---------- */
-const DEMO_SEED = {
+/* ---------- お試しモード（?demo を付けて開くと、この端末の中だけで動く） ---------- */
+const DEMO_SEED = () => { const t = nowStr().slice(0, 10); return {
   "スポット":[
-    {"ID":"d01","日時":"2026/11/14 08:52","区分":"ダーツ","名前":"【お試し】埼玉県 秩父市","住所":"埼玉県秩父市","緯度":"35.9917","経度":"139.0856"},
-    {"ID":"s01","日時":"2026/11/14 09:20","区分":"スポット","名前":"【お試し】秩父神社","種類":"観光","住所":"埼玉県秩父市番場町1-3","緯度":"35.9975","経度":"139.0839","ひとこと":"秩父の総社。境内の彫刻が見どころ","値段":"無料","営業時間":"終日","駐車場":"あり","追加した人":"Claude"},
-    {"ID":"s02","日時":"2026/11/14 09:21","区分":"スポット","名前":"【お試し】わらじかつ亭","種類":"飯","住所":"埼玉県秩父市番場町1-21","緯度":"35.9969","経度":"139.0851","ひとこと":"秩父名物わらじかつ丼","値段":"1,000〜1,500円","営業時間":"11:00〜15:00頃","駐車場":"わからない","追加した人":"Claude"},
-    {"ID":"s03","日時":"2026/11/14 09:22","区分":"スポット","名前":"【お試し】祭の湯","種類":"温泉","住所":"埼玉県秩父市野坂町1-16-15","緯度":"35.9903","経度":"139.0858","ひとこと":"西武秩父駅直結の日帰り温泉","値段":"1,000円前後","営業時間":"10:00〜23:00","駐車場":"あり","追加した人":"Claude"},
-    {"ID":"s04","日時":"2026/11/14 09:40","区分":"スポット","名前":"【お試し】羊山公園","種類":"観光","住所":"埼玉県秩父市大宮6267","緯度":"35.9844","経度":"139.0927","ひとこと":"街を見下ろす公園","追加した人":"たろう"}],
+    {"ID":"d01","日時":t+" 08:52","区分":"ダーツ","名前":"【お試し】埼玉県 秩父市","住所":"埼玉県秩父市","緯度":"35.9917","経度":"139.0856"},
+    {"ID":"s01","日時":t+" 09:20","区分":"スポット","名前":"【お試し】秩父神社","種類":"観光","住所":"埼玉県秩父市番場町1-3","緯度":"35.9975","経度":"139.0839","ひとこと":"秩父の総社。境内の彫刻が見どころ","値段":"無料","営業時間":"終日","駐車場":"あり","追加した人":AI_NAME},
+    {"ID":"s02","日時":t+" 09:21","区分":"スポット","名前":"【お試し】わらじかつ亭","種類":"飯","住所":"埼玉県秩父市番場町1-21","緯度":"35.9969","経度":"139.0851","ひとこと":"秩父名物わらじかつ丼","値段":"1,000〜1,500円","営業時間":"11:00〜15:00頃","追加した人":AI_NAME},
+    {"ID":"s03","日時":t+" 09:22","区分":"スポット","名前":"【お試し】秩父ミューズパーク","種類":"レジャー","住所":"埼玉県秩父市久那637-2","緯度":"35.9718","経度":"139.0697","ひとこと":"広い公園。展望台やアスレチック","追加した人":AI_NAME},
+    {"ID":"s04","日時":t+" 10:05","区分":"スポット","名前":"【お試し】羊山公園","種類":"観光","住所":"埼玉県秩父市大宮6267","緯度":"35.9844","経度":"139.0927","ひとこと":"街を見下ろす公園","追加した人":"たくや"}],
   "コメント":[
-    {"ID":"k01","日時":"2026/11/14 09:30","スポットID":"s02","名前":"はなこ","行きたい":"はい","コメント":""},
-    {"ID":"k02","日時":"2026/11/14 09:31","スポットID":"s02","名前":"じろう","行きたい":"はい","コメント":"昼はここがいい！"},
-    {"ID":"k03","日時":"2026/11/14 12:10","スポットID":"s01","名前":"たろう","行った":"はい","コメント":"彫刻すごかった"}],
-};
-const today = (() => { const d = new Date(), z = n => String(n).padStart(2, "0"); return `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())}`; })();
-const demoDB = () => store.get("demoDB2", null) || JSON.parse(JSON.stringify(DEMO_SEED).replaceAll("2026/11/14", today));
+    {"ID":"k01","日時":t+" 10:30","スポットID":"s02","名前":"はな","行きたい":"はい"},
+    {"ID":"k02","日時":t+" 10:31","スポットID":"s02","名前":"英雄","コメント":"昼はここがいい！"},
+    {"ID":"k03","日時":t+" 12:10","スポットID":"s01","名前":"きな","行った":"はい"}],
+}; };
+const demoDB = () => store.get("demoDB3", null) || DEMO_SEED();
 function demoApi(body){
   const db = demoDB(), list = db[body.sheet] = db[body.sheet] || [];
   const row = {...body.row};
   if (body.action === "append"){
-    row["ID"] = Math.random().toString(36).slice(2, 10);
-    const d = new Date(), z = n => String(n).padStart(2, "0");
-    row["日時"] = `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
-    if (body.sheet === "スポット" && dest && dest.ll){   // 本番は住所から位置を出す。お試しでは目的地の近くに置く
-      row["緯度"] = String(dest.ll[0] + (Math.random() - .5) * .04); row["経度"] = String(dest.ll[1] + (Math.random() - .5) * .04);
+    row["ID"] = Math.random().toString(36).slice(2, 10); row["日時"] = nowStr();
+    if (body.sheet === "スポット"){
+      const m = (row["GoogleマップURL"] || "").match(/\/place\/([^/@]+)/);
+      if (!row["名前"]) row["名前"] = m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : "（Googleマップのスポット）";
+      if (dest && dest.ll){ row["緯度"] = String(dest.ll[0] + (Math.random() - .5) * .04); row["経度"] = String(dest.ll[1] + (Math.random() - .5) * .04); }
     }
     list.push(row);
   } else {
-    const x = list.find(o => o["ID"] === body.id);
-    if (x) Object.assign(x, row);
+    const x = list.find(o => o["ID"] === body.id); if (x) Object.assign(x, row);
   }
-  store.set("demoDB2", db);
-  return {ok:true};
+  store.set("demoDB3", db);
+  return {ok:true, row};
 }
 
-/* ---------- 通信 ---------- */
-// raw：シートの中身（手元の写し）。書き込んだらまず手元を書き換えて、すぐ画面に出す
-let raw = null, pending = 0, loading = false;
+/* ---------- 通信（書き込んだらまず手元を書き換えて、すぐ画面に出す） ---------- */
 function applyLocal(body, serverRow){
-  if (!raw || DEMO) return;
+  if (!raw) return;
   const list = raw[body.sheet] = raw[body.sheet] || [];
-  if (body.action === "append"){
-    const d = new Date(), z = n => String(n).padStart(2, "0");
-    list.push(serverRow || {...body.row, "ID":"tmp" + Date.now(), "日時":`${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`});
-  } else {
-    const x = list.find(o => o["ID"] === body.id);
-    if (x) Object.assign(x, body.row);
-  }
-  store.set("cache", raw);
+  if (body.action === "append") list.push(serverRow || {...body.row, "ID":"tmp" + Date.now(), "日時":nowStr()});
+  else { const x = list.find(o => o["ID"] === body.id); if (x) Object.assign(x, body.row); }
+  if (!DEMO) store.set("cache", raw);
   ingest(raw); render();
 }
 async function api(body){
-  if (DEMO){ demoApi(body); ingest(demoDB()); render(); return {ok:true}; }
+  if (DEMO){ const r = demoApi(body); raw = demoDB(); ingest(raw); render(); return r; }
   pending++;
-  if (body.action === "update") applyLocal(body);          // 削除・復活は押した瞬間に画面へ
+  if (body.action === "update") applyLocal(body);
   let ok = false;
   try{
     const r = await fetch(SCRIPT_URL, {method:"POST", body:JSON.stringify(body)});
     const j = await r.json();
     if (!j.ok) throw new Error(j.error || "失敗しました");
     ok = true;
-    if (body.action === "append") applyLocal(body, j.row);  // 追加は送れた時点で画面へ（位置も入った状態）
+    if (body.action === "append") applyLocal(body, j.row);
     return j;
   }finally{
     pending--;
-    if (!ok) load(true);                                    // 失敗したら本当の状態に戻す
-    else if (!pending) setTimeout(() => load(), 1500);      // 少し後に最新と合わせる
+    if (!ok) load(true);
+    else if (!pending) setTimeout(() => load(), 1500);
   }
 }
-const stamp = pre => $("#updated").textContent = pre + new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"});
+const stamp = () => $("#updated").textContent = new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}) + " 更新";
 async function load(force){
   if (DEMO){
-    ingest(demoDB()); render();
-    $("#msg").innerHTML = `<div class="box" style="border-color:var(--c-kai)"><b>お試しモード</b>
-      <div class="note">自由に触ってOK。書き込みはこの端末の中だけに保存され、ほかの人には見えません。</div>
+    raw = demoDB(); ingest(raw); render(); stamp();
+    $("#msg").innerHTML = `<div class="box" style="border-color:var(--c-etc)"><b>お試しモード</b> <span class="note">書き込みはこの端末の中だけに保存されます。</span>
       <div class="acts"><button class="btn small" id="demoReset">最初の状態に戻す</button></div></div>`;
-    $("#demoReset").onclick = () => { store.set("demoDB2", null); fitted = false; load(); toast("最初の状態に戻しました"); };
-    stamp("お試し ");
+    $("#demoReset").onclick = () => { store.set("demoDB3", null); load(); };
     return;
   }
   if (loading && !force) return;
@@ -299,9 +269,9 @@ async function load(force){
     const r = await fetch(SCRIPT_URL + "?_=" + Date.now());
     const j = await r.json();
     if (!j.ok) throw new Error(j.error);
-    if (pending && !force) return;                          // 書き込み中に届いた古い内容は使わない
+    if (pending && !force) return;
     raw = j.data; store.set("cache", raw);
-    ingest(raw); msg(""); stamp("最終更新 "); render();
+    ingest(raw); msg(""); stamp(); render();
   }catch(e){
     if (!raw){
       const c = store.get("cache", null);
@@ -309,211 +279,169 @@ async function load(force){
       else $("#list").innerHTML = `<div class="empty">読み込めませんでした。</div>`;
     }
     msg(raw ? "電波が弱いため、前に読み込んだ内容を表示しています。" : "読み込めませんでした。電波の良いところで「↻ 更新」を押してください。");
-    $("#updated").textContent = "読み込み失敗";
+    $("#updated").textContent = "";
   }finally{ loading = false; }
 }
+
+/* ---------- データの整理 ---------- */
+const isHuman = name => !!name && name !== AI_NAME;
 function ingest(d){
   const num = v => { const n = parseFloat(v); return isFinite(n) ? n : null; };
-  const ts = s => Date.parse((s || "").replace(/\//g, "-").replace(" ", "T")) || 0;
-  const yes = v => /^(はい|TRUE|1|○|◯)$/i.test((v || "").trim());
+  const yes = v => /^(はい|TRUE|1|○|◯)$/i.test(String(v || "").trim());
+  const off = v => /^(非表示|削除)$/.test(String(v || "").trim());
+  comments = (d["コメント"] || []).filter(o => !off(o["表示"])).map(o => ({
+    id:o["ID"], ts:parseTs(o["日時"]), spot:o["スポットID"], name:String(o["名前"] || "").trim(),
+    went:yes(o["行った"]), want:yes(o["行きたい"]), text:String(o["コメント"] || "").trim(),
+  }));
   const all = (d["スポット"] || []).map((o, i) => ({
-    id:o["ID"] || "r" + i, ts:ts(o["日時"]), time:o["日時"], kind:o["区分"] || "スポット",
-    name:o["名前"] || "", type:o["種類"] || "その他", addr:o["住所"] || "", url:o["GoogleマップURL"] || "",
+    id:o["ID"] || "r" + i, idx:i, ts:parseTs(o["日時"]), kind:o["区分"] || "スポット",
+    name:String(o["名前"] || "").trim(), type:o["種類"] || "", addr:o["住所"] || "", url:o["GoogleマップURL"] || "",
     desc:o["ひとこと"] || "", price:o["値段"] || "", hours:o["営業時間"] || "", parking:o["駐車場"] || "",
-    by:o["追加した人"] || "", ll:(num(o["緯度"]) != null && num(o["経度"]) != null) ? [num(o["緯度"]), num(o["経度"])] : null,
-    hidden:/^(非表示|削除)$/.test(o["表示"] || ""), delBy:o["削除した人"] || "", delAt:o["削除日時"] || "",
-  })).filter(o => o.name || o.addr);
-  trashed = all.filter(o => o.hidden && o.kind !== "ダーツ").sort((a, b) => (b.delAt > a.delAt) - (b.delAt < a.delAt));
-  all.splice(0, all.length, ...all.filter(o => !o.hidden));
-  all.forEach(o => { if (!TYPES.some(T => T.key === o.type)) o.type = "その他"; });
-  dest = all.filter(o => o.kind === "ダーツ").sort((a, b) => b.ts - a.ts)[0] || null;
-  spots = all.filter(o => o.kind !== "ダーツ");
-  comments = (d["コメント"] || []).map(o => ({
-    id:o["ID"], ts:ts(o["日時"]), time:o["日時"], spot:o["スポットID"], name:(o["名前"] || "").trim(),
-    went:yes(o["行った"]), want:yes(o["行きたい"]), text:o["コメント"] || "",
-    hidden:/^(非表示|削除)$/.test(o["表示"] || ""),
-  })).filter(c => !c.hidden);
+    by:String(o["追加した人"] || "").trim(), upBy:String(o["更新した人"] || "").trim(), upTs:parseTs(o["更新日時"]),
+    ll:(num(o["緯度"]) != null && num(o["経度"]) != null) ? [num(o["緯度"]), num(o["経度"])] : null,
+    hidden:off(o["表示"]), delBy:o["削除した人"] || "", delAt:o["削除日時"] || "",
+  })).filter(o => o.name || o.url || o.addr);
+  all.forEach(o => {
+    if (!TYPES.some(T => T.key === o.type)) o.type = "その他";
+    if (!o.name) o.name = "（Googleマップのスポット）";
+    // 参加者が関わった時刻（追加・修正・ひとこと・反応のいちばん新しいもの）
+    const acts = [isHuman(o.by) ? o.ts : 0, isHuman(o.upBy) ? o.upTs : 0, ...comments.filter(c => c.spot === o.id).map(c => c.ts)];
+    o.human = Math.max(0, ...acts);
+  });
+  dest = all.filter(o => o.kind === "ダーツ" && !o.hidden).sort((a, b) => b.ts - a.ts)[0] || null;
+  spots = all.filter(o => o.kind !== "ダーツ" && !o.hidden);
+  trashed = all.filter(o => o.kind !== "ダーツ" && o.hidden).sort((a, b) => (b.delAt > a.delAt) - (b.delAt < a.delAt));
+  if (focusId && !spots.some(o => o.id === focusId)) focusId = null;
 }
 function msg(t){ $("#msg").innerHTML = t ? `<div class="box err">${esc(t)}</div>` : ""; }
-function toast(t){
-  const e = document.createElement("div"); e.className = "toast"; e.textContent = t;
-  document.body.appendChild(e); setTimeout(() => e.remove(), 2400);
-}
+function toast(t){ const e = document.createElement("div"); e.className = "toast"; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 2200); }
 
-/* ---------- 便利関数 ---------- */
 function km(a, b){
-  const R = 6371, r = x => x * Math.PI / 180;
-  const d1 = r(b[0]-a[0]), d2 = r(b[1]-a[1]);
+  const R = 6371, r = x => x * Math.PI / 180, d1 = r(b[0]-a[0]), d2 = r(b[1]-a[1]);
   const h = Math.sin(d1/2)**2 + Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(d2/2)**2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
-const typeColor = t => cssVar((TYPES.find(T => T.key === t) || TYPES[4]).color);
-const where = o => o.ll ? o.ll.join(",") : (o.addr || o.name);
-const navUrl = o => "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + encodeURIComponent(where(o));
-const gmapUrl = o => isUrl(o.url) ? o.url : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.ll ? o.ll.join(",") : (o.name + " " + o.addr));
+const typeColor = t => cssVar((TYPES.find(T => T.key === t) || TYPES[3]).color);
+const gmapUrl = o => isUrl(o.url) ? o.url : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.addr ? o.name + " " + o.addr : o.ll ? o.ll.join(",") : o.name);
 const embedUrl = (o, z) => "https://maps.google.com/maps?hl=ja&output=embed&z=" + z + "&q=" + encodeURIComponent(o.ll ? o.ll.join(",") : (o.addr || o.name));
-const hhmm = o => o.ts ? new Date(o.ts).toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}) : (o.time || "");
-const nameOf = c => c.name || "だれか";
-const cmtsOf = id => comments.filter(c => c.spot === id).sort((a, b) => a.ts - b.ts);
-// 同じ人の重複は1回と数える（名前なしは1件ずつ）
-const countBy = (id, key) => new Set(comments.filter(c => c.spot === id && c[key]).map((c, i) => c.name || "#" + i)).size;
+const hhmm = ts => ts ? new Date(ts).toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}) : "";
+const nm = n => n || "だれか";
+const cmtsOf = id => comments.filter(c => c.spot === id);
+const reactors = (id, key) => [...new Set(cmtsOf(id).filter(c => c[key]).map(c => nm(c.name)))];
+const mineOf = (id, key) => me ? cmtsOf(id).filter(c => c[key] && c.name === me) : [];
 
 /* ---------- 描画 ---------- */
-function render(){ renderDest(); renderChips(); renderList(); renderLog(); renderTrash(); if (tab === "map") renderMap(); }
-function renderTrash(){
-  $("#trashBox").hidden = !trashed.length;
-  $("#trashCount").textContent = trashed.length;
-  $("#trash").innerHTML = trashed.map(o => `<div class="it"><div><b>${esc(o.name)}</b> <span class="note">${esc(o.type)}</span>
-      <div class="by">${o.delBy ? esc(o.delBy) + "が削除" : "削除"}${o.delAt ? "・" + esc(o.delAt) : ""}</div></div>
-      <button class="btn small" data-act="restore" data-id="${esc(o.id)}">↩ 元に戻す</button></div>`).join("");
-}
-const nowStr = () => new Date().toLocaleString("ja-JP", {month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit"});
-async function setRow(sheet, id, row, done){
-  try{ await api({sheet, action:"update", id, row}); toast(done); }
-  catch(e){ alert("うまくいきませんでした。電波を確認してもう一度押してください。"); }
-}
+function render(){ renderDest(); renderChips(); renderList(); renderLog(); renderFoot(); }
 
+let lastEmbed = "";
 function renderDest(){
   if (!dest){
-    $("#dest").innerHTML = `<div class="box dest wait"><div class="lbl">🎯 今日の目的地</div>
-      <h2>ダーツが刺さったら<br>ここに出ます</h2></div>`;
-    return;
+    $("#dest").innerHTML = `<div class="box dest wait"><div class="lbl">🎯 今日の目的地</div><h2>ダーツが刺さったら<br>ここに出ます</h2></div>`;
+    lastEmbed = ""; return;
   }
+  const f = focusId && spots.find(o => o.id === focusId);
+  const src = f ? embedUrl(f, 15) : embedUrl(dest, 11);
+  if ($("#destMap") && lastEmbed === src && $("#destName").textContent === dest.name){   // 地図は同じなら読み込み直さない
+    $("#focusbar").outerHTML = focusBar(f); return;
+  }
+  lastEmbed = src;
   $("#dest").innerHTML = `<div class="box dest"><div class="in">
       <div class="lbl">🎯 今日の目的地</div>
-      <h2>${esc(dest.name)}</h2>
+      <h2 id="destName">${esc(dest.name)}</h2>
       ${dest.desc ? `<div class="sub2">${esc(dest.desc)}</div>` : ""}
-      ${dest.addr && !isUrl(dest.addr) && dest.addr !== dest.name ? `<div class="sub2">${esc(dest.addr)}</div>` : ""}
-      <div class="acts" style="margin-top:12px">
-        <a class="btn go" target="_blank" rel="noopener" href="${navUrl(dest)}">🚗 ナビ開始</a>
-        <a class="btn" target="_blank" rel="noopener" href="${esc(gmapUrl(dest))}">Googleマップ</a>
-      </div>
-    </div>
-    <iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${embedUrl(dest, 11)}" title="目的地の地図"></iframe></div>`;
+      ${dest.addr && dest.addr !== dest.name ? `<div class="sub2">${esc(dest.addr)}</div>` : ""}
+      <div class="acts"><a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(dest))}">Googleマップで開く</a></div>
+    </div>${focusBar(f)}
+    <iframe id="destMap" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${src}" title="地図"></iframe></div>`;
 }
+const focusBar = f => f ? `<div class="focusbar" id="focusbar"><b>📍 ${esc(f.name)}</b><button class="btn small" data-act="unfocus">目的地に戻す</button></div>` : `<div id="focusbar" hidden></div>`;
 
 function renderChips(){
-  const counts = {};
-  spots.forEach(o => counts[o.type] = (counts[o.type] || 0) + 1);
-  const chip = (k, label) => `<button class="chip" data-type="${esc(k)}" aria-pressed="${typeF === k}">${label}</button>`;
-  const types = chip("all", "すべて " + spots.length) + TYPES.filter(T => counts[T.key]).map(T => chip(T.key, T.key + " " + counts[T.key])).join("");
-  $("#chips").innerHTML = types + `<button class="chip" data-near="1" aria-pressed="${nearMe}">📍 今いる所から近い順</button>`;
-  $("#mapChips").innerHTML = types;
+  const counts = {}; spots.forEach(o => counts[o.type] = (counts[o.type] || 0) + 1);
+  const chip = (k, l) => `<button class="chip" data-type="${esc(k)}" aria-pressed="${typeF === k}">${l}</button>`;
+  $("#chips").innerHTML = chip("all", "すべて") + TYPES.filter(T => counts[T.key]).map(T => chip(T.key, T.key)).join("");
+  document.querySelectorAll("#sort button").forEach(b => b.setAttribute("aria-pressed", b.dataset.sort === sortBy));
+  $("#sort").hidden = !(dest && dest.ll);
+  if (!(dest && dest.ll)) sortBy = "new";
 }
 
-const filtered = () => spots.filter(o => typeF === "all" || o.type === typeF);
-const origin = () => (nearMe && me) ? me : (dest && dest.ll);
-
+function card(o){
+  const open = openId === o.id;
+  const want = reactors(o.id, "want"), went = reactors(o.id, "went"), texts = cmtsOf(o.id).filter(c => c.text);
+  const myWant = mineOf(o.id, "want").length, myWent = mineOf(o.id, "went").length;
+  const who = [o.by ? `${esc(o.by)}が追加` : "", isHuman(o.upBy) ? `${esc(o.upBy)}が更新` : ""].filter(Boolean).join("・");
+  const info = [["駐車場", o.parking], ["値段", o.price], ["営業時間", o.hours], ["住所", o.addr]].filter(x => x[1]);
+  return `<article class="card ${open ? "open" : ""}" data-card="${esc(o.id)}" id="c-${esc(o.id)}">
+    <div class="top"><div class="t">
+      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)}</h3>
+      ${o.desc ? `<div class="desc">${esc(o.desc)}</div>` : ""}
+      ${who ? `<div class="who">${who}</div>` : ""}
+    </div><span class="chev">${open ? "▲" : "▼"}</span></div>
+    <div class="reacts">
+      <button class="rb w ${myWant ? "on" : ""}" data-act="want" data-id="${esc(o.id)}">🙋 行きたい${want.length ? " " + want.length : ""}</button>
+      <button class="rb g ${myWent ? "on" : ""}" data-act="went" data-id="${esc(o.id)}">✅ 行った${went.length ? " " + went.length : ""}</button>
+      <button class="rb" data-act="cmt" data-id="${esc(o.id)}">💬${texts.length ? " " + texts.length : " ひとこと"}</button>
+    </div>
+    ${open ? `<div class="more">
+      ${info.length ? `<dl>${info.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : ""}
+      ${want.length ? `<div class="names-line">🙋 ${want.map(esc).join("・")}</div>` : ""}
+      ${went.length ? `<div class="names-line">✅ ${went.map(esc).join("・")}</div>` : ""}
+      ${texts.map(c => `<div class="cmt">💬 <b>${esc(nm(c.name))}</b>：${esc(c.text)}<button class="x" data-act="delCmt" data-id="${esc(c.id)}" aria-label="消す">×</button></div>`).join("")}
+      <div class="acts">
+        ${o.ll || o.addr || o.url ? `<button class="btn small" data-act="focus" data-id="${esc(o.id)}">🗺 上の地図で見る</button>` : ""}
+        <a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(o))}">Googleマップで開く</a>
+      </div>
+      <div class="acts">
+        <button class="btn small" data-act="edit" data-id="${esc(o.id)}">✏️ 直す</button>
+        <button class="btn small" data-act="del" data-id="${esc(o.id)}">🗑 消す</button>
+      </div>
+    </div>` : ""}
+  </article>`;
+}
 function renderList(){
-  const v = filtered(), o0 = origin();
-  if (o0) v.sort((a, b) => (a.ll ? km(o0, a.ll) : 1e9) - (b.ll ? km(o0, b.ll) : 1e9));
-  else v.sort((a, b) => b.ts - a.ts);
+  const v = spots.filter(o => typeF === "all" || o.type === typeF);
+  const near = sortBy === "near" && dest && dest.ll;
+  const cmp = near ? (a, b) => (a.ll ? km(dest.ll, a.ll) : 1e9) - (b.ll ? km(dest.ll, b.ll) : 1e9) : null;
+  const humans = v.filter(o => o.human).sort(cmp || ((a, b) => b.human - a.human || b.ts - a.ts || b.idx - a.idx));
+  const ai = v.filter(o => !o.human).sort(cmp || ((a, b) => b.ts - a.ts || b.idx - a.idx));
   if (!v.length){
-    $("#list").innerHTML = `<div class="empty">${spots.length ? "このジャンルはまだありません" : "まだスポットがありません。<br>見つけたら「＋ スポット追加」から登録してね。"}</div>`;
+    $("#list").innerHTML = `<div class="empty">${spots.length ? "この種類はまだありません" : "まだスポットがありません。<br>見つけたら「＋ スポット追加」から。"}</div>`;
     return;
   }
-  $("#list").innerHTML = v.map(o => {
-    const went = countBy(o.id, "went"), want = countBy(o.id, "want"), cs = cmtsOf(o.id);
-    const dist = (o0 && o.ll) ? `<span class="dist">${nearMe ? "今いる所から" : "目的地から"}約${km(o0, o.ll).toFixed(1)}km</span>` : "";
-    const badges = [
-      o.parking ? `<span class="badge">🅿 駐車場 ${esc(o.parking)}</span>` : "",
-      want ? `<span class="badge want">🙋 行きたい ${want}</span>` : "",
-      went ? `<span class="badge ok">✅ 行った ${went}</span>` : ""].join("");
-    const info = [["値段", o.price], ["営業", o.hours], ["住所", isUrl(o.addr) ? "" : o.addr]].filter(x => x[1]);
-    const lines = cs.filter(c => c.text || c.went || c.want).map(c =>
-      `<div class="cmt">${c.went ? "✅" : c.want ? "🙋" : "💬"} <b>${esc(nameOf(c))}</b>${c.text ? "：" + esc(c.text) : c.went ? " 行った" : " 行きたい"}<button class="x" data-act="delCmt" data-id="${esc(c.id)}" aria-label="このひとことを消す">×</button></div>`);
-    return `<article class="card" id="c-${esc(o.id)}">
-      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)}<button class="del" data-act="delSpot" data-id="${esc(o.id)}" aria-label="このスポットを消す">🗑</button></h3>
-      ${badges ? `<div class="badges">${badges}</div>` : ""}
-      ${dist ? `<div>${dist}</div>` : ""}
-      ${o.desc ? `<div class="desc">${esc(o.desc)}</div>` : ""}
-      ${info.length ? `<dl>${info.map(([k, x]) => `<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>` : ""}
-      ${o.by ? `<div class="by">追加：${esc(o.by)}</div>` : ""}
-      ${lines.length ? `<div class="cmts">${lines.join("")}</div>` : ""}
-      <div class="acts">
-        <button class="btn small primary" data-act="react" data-id="${esc(o.id)}">✍️ 行った・ひとこと</button>
-        <button class="btn small" data-act="gmap" data-id="${esc(o.id)}">${openMaps.has(o.id) ? "地図を閉じる" : "🗺 地図"}</button>
-        <a class="btn small" target="_blank" rel="noopener" href="${navUrl(o)}">🚗 ナビ</a>
-      </div>
-      ${openMaps.has(o.id) ? `<iframe class="gmap" loading="lazy" src="${embedUrl(o, 15)}" title="${esc(o.name)}の地図"></iframe>
-        <div class="acts"><a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(o))}">Googleマップで開く</a></div>` : ""}
-    </article>`;
-  }).join("");
+  $("#list").innerHTML =
+    (humans.length ? `<div class="group">みんなが追加・更新</div><div class="cards">${humans.map(card).join("")}</div>` : "") +
+    (ai.length ? `<div class="group">Claudeが調べた候補</div><div class="cards">${ai.map(card).join("")}</div>` : "");
 }
 
 function renderLog(){
   const byId = Object.fromEntries(spots.map(o => [o.id, o]));
-  const items = comments.filter(c => c.went && byId[c.spot]).map(c => ({ts:c.ts, html:`<div class="log"><span class="t">${esc(hhmm(c))}</span><br>
-      ✅ <b>${esc(byId[c.spot].name)}</b> <span class="note">${esc(byId[c.spot].type)}</span><br>${esc(nameOf(c))}${c.text ? "：" + esc(c.text) : ""}</div>`}));
-  if (dest) items.push({ts:dest.ts, html:`<div class="log" style="border-color:#6a1fc2"><span class="t">${esc(hhmm(dest))}</span><br>🎯 <b>目的地決定：${esc(dest.name)}</b></div>`});
+  const items = comments.filter(c => c.went && byId[c.spot]).map(c => ({ts:c.ts, html:`<div class="log"><span class="t">${esc(hhmm(c.ts))}</span><br>
+    ✅ <b>${esc(byId[c.spot].name)}</b> <span class="note">${esc(nm(c.name))}</span></div>`}));
+  if (dest) items.push({ts:dest.ts, html:`<div class="log" style="border-color:#6a1fc2"><span class="t">${esc(hhmm(dest.ts))}</span><br>🎯 <b>目的地決定：${esc(dest.name)}</b></div>`});
   items.sort((a, b) => b.ts - a.ts);
-  $("#log").innerHTML = items.length ? items.map(x => x.html).join("") :
-    `<div class="empty">まだ記録がありません。<br>スポットの「✍️ 行った・ひとこと」で「行った」を選ぶとここに残ります。</div>`;
+  $("#log").innerHTML = items.length ? items.map(x => x.html).join("") : `<div class="empty">まだ記録がありません。<br>行った場所で「✅ 行った」を押すとここに残ります。</div>`;
 }
-
-function pin(color, label, big){
-  const s = big ? 38 : 28;
-  return L.divIcon({className:"", html:`<div class="pin${big ? " big" : ""}" style="background:${color}"><i>${label}</i></div>`,
-    iconSize:[s, s], iconAnchor:[s/2, s], popupAnchor:[0, -s + 4]});
-}
-function renderMap(){
-  if (!window.L) return;
-  if (!map){
-    map = L.map("map").setView([35.75, 139.9], 8);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      maxZoom:19, subdomains:"abcd",
-      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>'}).addTo(map);
-    layer = L.layerGroup().addTo(map);
-  }
-  map.invalidateSize();
-  layer.clearLayers();
-  const pts = [];
-  filtered().forEach(o => {
-    if (!o.ll) return;
-    markers[o.id] = L.marker(o.ll, {icon:pin(typeColor(o.type), countBy(o.id, "went") ? "✓" : "")})
-      .bindPopup(`<b>${esc(o.name)}</b> <span class="note">${esc(o.type)}</span>${o.desc ? "<br>" + esc(o.desc) : ""}
-        <div class="acts"><button class="btn small" data-act="goto" data-id="${esc(o.id)}">詳しく</button>
-        <a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a></div>`)
-      .addTo(layer);
-    pts.push(o.ll);
-  });
-  if (dest && dest.ll){
-    L.marker(dest.ll, {icon:pin("#6a1fc2", "🎯", true), zIndexOffset:1000})
-      .bindTooltip("🎯 " + dest.name, {permanent:true, direction:"top", offset:[0, -36], className:"dest-tip"})
-      .bindPopup(`<b>🎯 ${esc(dest.name)}</b><div class="acts"><a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(dest)}">ナビ</a></div>`).addTo(layer);
-    pts.push(dest.ll);
-  }
-  if (me){
-    meMarker = L.marker(me, {icon:L.divIcon({className:"", html:'<div class="me"></div>', iconSize:[16, 16], iconAnchor:[8, 8]})}).addTo(layer);
-    pts.push(me);
-  }
-  if (!fitted && pts.length){ map.fitBounds(pts, {padding:[30, 30], maxZoom:14}); fitted = true; }
+function renderFoot(){
+  $("#meLabel").textContent = me ? `👤 ${me} として参加中` : "👤 名前を選んでいません";
+  $("#trashBox").hidden = !trashed.length;
+  $("#trashCount").textContent = trashed.length;
+  $("#trash").innerHTML = trashed.map(o => `<div class="it"><div><b>${esc(o.name)}</b>
+      <div class="note">${o.delBy ? esc(o.delBy) + "が削除" : "削除"}${o.delAt ? "・" + esc(o.delAt.slice(5)) : ""}</div></div>
+      <button class="btn small" data-act="restore" data-id="${esc(o.id)}">↩ 元に戻す</button></div>`).join("");
 }
 
 /* ---------- 入力画面 ---------- */
 const seg = (name, opts, sel) => `<div class="seg">${opts.map((o, i) =>
   `<input type="radio" id="${name}${i}" name="${name}" value="${esc(o)}" ${o === sel ? "checked" : ""}><label for="${name}${i}">${esc(o)}</label>`).join("")}</div>`;
-// 名前は参加者の一覧から選ぶ（一度選べば記憶）
-const nameField = () => {
-  const other = myName && !MEMBERS.includes(myName);
-  return `<label>あなたは？（選ばなくてもOK）</label><div class="names">${
-    [...MEMBERS, "その他"].map((n, i) => `<input type="radio" id="who${i}" name="who" value="${esc(n)}"
-      ${(n === myName || (n === "その他" && other)) ? "checked" : ""}><label for="who${i}">${esc(n)}</label>`).join("")}</div>
-    <input type="text" name="whoOther" id="whoOther" maxlength="20" value="${other ? esc(myName) : ""}" placeholder="名前を入れてね" style="margin-top:6px" ${other ? "" : "hidden"}>`;
-};
-
-function openDialog(html, onSubmit, okLabel = "送る"){
+function openDialog(html, onSubmit, okLabel = "送る", cancel = true){
   const f = $("#dlgForm");
-  f.innerHTML = html + `<div class="dlg-acts"><button type="button" class="btn" id="dlgCancel">やめる</button>
+  f.innerHTML = html + `<div class="warn" id="dlgWarn"></div><div class="dlg-acts">${cancel ? `<button type="button" class="btn" id="dlgCancel">やめる</button>` : ""}
     <button class="btn primary" id="dlgOk">${okLabel}</button></div>`;
-  $("#dlgCancel").onclick = () => $("#dlg").close();
-  f.querySelectorAll('input[name="who"]').forEach(r => r.onchange = () => { const o = $("#whoOther"); if (o){ o.hidden = r.value !== "その他"; if (!o.hidden) o.focus(); } });
+  if (cancel) $("#dlgCancel").onclick = () => $("#dlg").close();
   f.onsubmit = async e => {
     e.preventDefault();
     const fd = Object.fromEntries(new FormData(f));
     for (const k in fd) fd[k] = String(fd[k]).trim();
-    if (fd.who === "その他") fd.who = fd.whoOther || "";
-    if ("who" in fd){ myName = fd.who; store.set("myName", myName); }
     const ok = $("#dlgOk"); ok.disabled = true; ok.textContent = "送信中…";
     try{
       const r = await onSubmit(fd);
@@ -521,108 +449,121 @@ function openDialog(html, onSubmit, okLabel = "送る"){
       $("#dlg").close();
     }catch(err){
       ok.disabled = false; ok.textContent = okLabel;
-      alert("送れませんでした。電波を確認してもう一度押してください。");
+      $("#dlgWarn").textContent = "送れませんでした。電波を確認してもう一度押してください。";
     }
   };
   $("#dlg").showModal();
 }
+const warn = t => { $("#dlgWarn").textContent = t; return false; };
 
-// 行った・行きたい・ひとことを1回でまとめて送る（どれか1つあればOK）
-function react(id){
-  const o = spots.find(s => s.id === id); if (!o) return;
-  openDialog(`<h2>${esc(o.name)}</h2>
-    <div class="big2">
-      <input type="checkbox" id="rWant" name="want"><label class="w" for="rWant">🙋 行きたい</label>
-      <input type="checkbox" id="rWent" name="went"><label class="g" for="rWent">✅ 行った</label>
-    </div>
-    <label>ひとこと（なくてもOK）</label>
-    <textarea name="text" maxlength="300" placeholder="例：わらじかつ最高！／ちょっとしょぼかった"></textarea>
-    ${nameField()}
-    <div id="rHint" class="hint" style="color:var(--accent);font-size:14px"></div>`, fd => {
-      if (!fd.want && !fd.went && !fd.text){ $("#rHint").textContent = "「行きたい」「行った」を選ぶか、ひとこと書いてね"; return false; }
-      return api({sheet:"コメント", action:"append", row:{
-        "スポットID":id, "名前":fd.who, "行った":fd.went ? "はい" : "", "行きたい":fd.want && !fd.went ? "はい" : "", "コメント":fd.text}})
-        .then(() => toast("送りました！"));
-    });
-  // 「行った」を選んだら「行きたい」は外す（逆も同じ）
-  $("#rWant").onchange = () => { if ($("#rWant").checked) $("#rWent").checked = false; };
-  $("#rWent").onchange = () => { if ($("#rWent").checked) $("#rWant").checked = false; };
+function askName(first){
+  openDialog(`<h2>あなたは？</h2><div class="hint">一度選べば、次からは聞きません</div>
+    <div class="names">${MEMBERS.map((n, i) => `<input type="radio" id="nm${i}" name="who" value="${esc(n)}" ${n === me ? "checked" : ""}><label for="nm${i}">${esc(n)}</label>`).join("")}</div>`,
+    fd => { if (!fd.who) return warn("名前をタップしてね"); me = fd.who; store.set("myName", me); render(); toast(`${me} で参加中`); },
+    "決定", !first);
 }
+const needName = () => { if (me) return true; askName(true); return false; };
 
-const norm = t => (t || "").replace(/【.*?】|\s/g, "").toLowerCase();
-function spotDialog(){
-  openDialog(`<h2>＋ スポット追加</h2>
-    <div class="hint">名前だけでも登録できます</div>
-    <label>名前</label><input type="text" name="spot" required maxlength="60" placeholder="例：〇〇食堂、△△城跡">
-    <label>種類</label>${seg("type", TYPES.map(T => T.key), "")}
-    <label>場所（住所かGoogleマップのリンク）</label><input type="text" name="place" placeholder="貼り付けるだけでOK">
-    <label>ひとこと</label><textarea name="desc" placeholder="名物、おすすめポイントなど"></textarea>
-    <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], "")}
-    <details class="more"><summary>値段・営業時間も書く</summary>
-      <div class="two"><div><label>値段の目安</label><input type="text" name="price" placeholder="例：1,000円くらい"></div>
-      <div><label>営業時間</label><input type="text" name="hours" placeholder="例：11〜20時"></div></div></details>
-    ${nameField()}`,
+// Googleマップの共有文（「店名 + URL」）からURLと店名を取り出す
+function splitPaste(s){
+  const m = (s || "").match(/https?:\/\/\S+/);
+  if (!m) return {url:"", name:s.trim()};
+  let name = s.replace(m[0], "").replace(/[\n\r]+/g, " ").trim();
+  if (!name){ const p = m[0].match(/\/maps\/place\/([^/@?]+)/); if (p) name = decodeURIComponent(p[1].replace(/\+/g, " ")); }
+  return {url:m[0], name};
+}
+function spotDialog(o){
+  const v = o || {};
+  const area = dest ? dest.name.replace(/【.*?】/g, "") : "";
+  openDialog(`<h2>${o ? "✏️ スポットを直す" : "＋ スポット追加"}</h2>
+    ${o ? `<label>名前</label><input type="text" name="name" value="${esc(v.name)}" maxlength="60">
+      <label>Googleマップのリンク</label><input type="text" name="url" value="${esc(v.url)}" placeholder="https://maps.app.goo.gl/…">`
+    : `<label>Googleマップのリンク、または名前</label>
+      <input type="text" name="paste" id="paste" placeholder="リンクを貼るか、名前を打つだけでOK" autocomplete="off">
+      <div class="acts"><a class="btn small" id="gsearch" target="_blank" rel="noopener" href="#">🔍 Googleマップで探す</a></div>
+      <div class="hint">Googleマップでお店を開いて「共有」→「リンクをコピー」して貼ると、名前と場所が自動で入ります</div>`}
+    <label>種類（なくてもOK）</label>${seg("type", TYPES.map(T => T.key), v.type && v.type !== "その他" ? v.type : (o ? "その他" : ""))}
+    <label>ひとこと（なくてもOK）</label><textarea name="desc" placeholder="名物、おすすめポイントなど">${esc(v.desc)}</textarea>
+    <details class="opt" ${o && (v.parking || v.price || v.hours || v.addr) ? "open" : ""}><summary>詳しく（駐車場・値段・営業時間・住所）</summary>
+      <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], v.parking)}
+      <div class="two"><div><label>値段の目安</label><input type="text" name="price" value="${esc(v.price)}" placeholder="例：1,000円くらい"></div>
+      <div><label>営業時間</label><input type="text" name="hours" value="${esc(v.hours)}" placeholder="例：11〜20時"></div></div>
+      <label>住所</label><input type="text" name="addr" value="${esc(v.addr)}"></details>`,
     fd => {
-      const dup = spots.find(x => norm(x.name) === norm(fd.spot));
-      if (dup && !confirm(`「${dup.name}」はもう登録されています。それでも追加しますか？\n（感想なら、そのスポットの「✍️ 行った・ひとこと」から書けます）`)) return false;
-      const url = isUrl(fd.place) ? fd.place : "", addr = isUrl(fd.place) ? "" : fd.place;
-      return api({sheet:"スポット", action:"append", row:{"区分":"スポット", "名前":fd.spot, "種類":fd.type || "その他",
-        "住所":addr, "GoogleマップURL":url, "ひとこと":fd.desc, "値段":fd.price || "", "営業時間":fd.hours || "",
-        "駐車場":fd.parking || "", "追加した人":fd.who}}).then(() => toast("追加しました！"));
-    }, "追加");
+      const extra = {"種類":fd.type || "その他", "ひとこと":fd.desc, "駐車場":fd.parking || "", "値段":fd.price, "営業時間":fd.hours, "住所":fd.addr};
+      if (o){
+        const url = isUrl(fd.url) ? splitPaste(fd.url).url : "";
+        const row = {"名前":fd.name || o.name, "GoogleマップURL":url, ...extra, "更新した人":me, "更新日時":nowStr()};
+        if (url !== o.url || fd.addr !== o.addr){ row["緯度"] = ""; row["経度"] = ""; }   // 場所が変わったら位置を取り直す
+        return api({sheet:"スポット", action:"update", id:o.id, row}).then(() => toast("直しました"));
+      }
+      if (!fd.paste) return warn("リンクを貼るか、名前を打ってね");
+      const {url, name} = splitPaste(fd.paste);
+      const dup = name && spots.find(x => x.name.replace(/【.*?】/g, "") === name);
+      if (dup && !confirm(`「${dup.name}」はもう登録されています。それでも追加しますか？`)) return false;
+      return api({sheet:"スポット", action:"append", row:{"区分":"スポット", "名前":name, "GoogleマップURL":url, ...extra, "追加した人":me}})
+        .then(() => { sortBy = "new"; typeF = "all"; render(); toast("追加しました！"); });
+    }, o ? "直す" : "追加");
+  if (!o){
+    const upd = () => $("#gsearch").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(($("#paste").value.trim() || "観光 飯") + " " + area);
+    $("#paste").oninput = upd; upd();
+  }
+}
+function cmtDialog(id){
+  const o = spots.find(s => s.id === id); if (!o) return;
+  openDialog(`<h2>💬 ${esc(o.name)}</h2><textarea name="text" maxlength="300" placeholder="例：ここ最高！／ちょっとしょぼかった" required></textarea>`,
+    fd => fd.text ? api({sheet:"コメント", action:"append", row:{"スポットID":id, "名前":me, "コメント":fd.text}}).then(() => toast("送りました")) : warn("ひとこと書いてね"));
+}
+async function toggle(id, key){
+  const mine = mineOf(id, key);
+  try{
+    if (mine.length) await Promise.all(mine.map(c => api({sheet:"コメント", action:"update", id:c.id, row:{"表示":"非表示"}})));
+    else{
+      const label = key === "want" ? "行きたい" : "行った";
+      await api({sheet:"コメント", action:"append", row:{"スポットID":id, "名前":me, [label]:"はい"}});
+      toast(key === "want" ? "🙋 行きたい！" : "✅ 行った記録に残しました");
+    }
+  }catch(e){ alert("送れませんでした。電波を確認してもう一度押してください。"); }
+}
+async function setRow(sheet, id, row, done){
+  try{ await api({sheet, action:"update", id, row}); toast(done); }
+  catch(e){ alert("うまくいきませんでした。電波を確認してもう一度押してください。"); }
 }
 
 /* ---------- 操作 ---------- */
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-tab],[data-type],[data-near],[data-act]");
+  const t = e.target.closest("[data-tab],[data-type],[data-sort],[data-act],[data-card]");
   if (!t) return;
   if (t.dataset.tab){
     tab = t.dataset.tab;
     document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b === t));
-    ["list", "map", "log"].forEach(k => $("#p-" + k).hidden = k !== tab);
-    if (tab === "map") renderMap();
+    $("#p-list").hidden = tab !== "list"; $("#p-log").hidden = tab !== "log";
     return;
   }
-  if (t.dataset.type){ typeF = t.dataset.type; fitted = false; render(); return; }
-  if (t.dataset.near){
-    if (nearMe){ nearMe = false; render(); return; }
-    locateMe(() => { nearMe = true; render(); });
-    return;
-  }
-  const id = t.dataset.id, act = t.dataset.act;
-  if (act === "react") react(id);
-  else if (act === "delSpot"){
-    const o = spots.find(x => x.id === id);
+  if (t.dataset.type){ typeF = t.dataset.type; renderChips(); renderList(); return; }
+  if (t.dataset.sort){ sortBy = t.dataset.sort; renderChips(); renderList(); return; }
+  if (t.dataset.card){ if (e.target.closest("a,button,.more")) return; openId = openId === t.dataset.card ? null : t.dataset.card; renderList(); return; }
+  const id = t.dataset.id, act = t.dataset.act, o = spots.find(x => x.id === id);
+  if (act === "want" || act === "went"){ if (needName()) toggle(id, act); }
+  else if (act === "cmt"){ if (needName()) cmtDialog(id); }
+  else if (act === "focus"){ focusId = id; renderDest(); window.scrollTo({top:0, behavior:"smooth"}); }
+  else if (act === "unfocus"){ focusId = null; renderDest(); }
+  else if (act === "edit"){ if (o && needName()) spotDialog(o); }
+  else if (act === "del"){
     if (o && confirm(`「${o.name}」を消しますか？\n（いちばん下の「削除したスポット」から元に戻せます）`))
-      setRow("スポット", id, {"表示":"非表示", "削除した人":myName, "削除日時":nowStr()}, "消しました");
+      setRow("スポット", id, {"表示":"非表示", "削除した人":me, "削除日時":nowStr()}, "消しました");
   }
-  else if (act === "restore"){
-    const o = trashed.find(x => x.id === id);
-    if (o) setRow("スポット", id, {"表示":"", "削除した人":"", "削除日時":""}, `「${o.name}」を元に戻しました`);
-  }
-  else if (act === "delCmt"){
-    if (confirm("このひとことを消しますか？（元に戻せません）")) setRow("コメント", id, {"表示":"非表示"}, "消しました");
-  }
-  else if (act === "gmap"){ openMaps.has(id) ? openMaps.delete(id) : openMaps.add(id); renderList(); }
-  else if (act === "goto"){
-    $('[data-tab="list"]').click();
-    const c = document.getElementById("c-" + id);
-    if (c){ document.querySelectorAll(".card.focus").forEach(x => x.classList.remove("focus")); c.classList.add("focus"); c.scrollIntoView({behavior:"smooth", block:"center"}); }
-  }
+  else if (act === "restore"){ const x = trashed.find(s => s.id === id); if (x) setRow("スポット", id, {"表示":"", "削除した人":"", "削除日時":""}, `「${x.name}」を元に戻しました`); }
+  else if (act === "delCmt"){ if (confirm("このひとことを消しますか？（元に戻せません）")) setRow("コメント", id, {"表示":"非表示"}, "消しました"); }
 });
-function locateMe(done){
-  if (!navigator.geolocation){ alert("この端末では現在地が使えません"); return; }
-  toast("現在地を確認中…");
-  navigator.geolocation.getCurrentPosition(p => { me = [p.coords.latitude, p.coords.longitude]; done(); },
-    () => alert("現在地がわかりませんでした（位置情報の許可を確認してください）"), {enableHighAccuracy:true, timeout:10000});
-}
-$("#addBtn").onclick = () => spotDialog();
-$("#reload").onclick = load;
+$("#addBtn").onclick = () => { if (needName()) spotDialog(null); };
+$("#reload").onclick = () => load(true);
+$("#changeName").onclick = () => askName(false);
 
-if (!DEMO){ const c = store.get("cache", null); if (c){ raw = c; ingest(raw); render(); } }   // 前回の内容をすぐ出してから最新を取りに行く
+if (!DEMO){ const c = store.get("cache", null); if (c){ raw = c; ingest(raw); render(); } }
 load();
-setInterval(() => { if (!document.hidden && !$("#dlg").open) load(); }, 60000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden && !$("#dlg").open) load(); });
+if (!me) askName(true);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !$("#dlg").open) load(); });   // 開き直したときだけ更新
 </script>
 </body>
 </html>
