@@ -8,20 +8,20 @@
 <style>
 :root{
   --bg:#f6f1e7; --card:#fffdf8; --ink:#2a2420; --sub:#6d635a; --line:#e3d9c8;
-  --accent:#c8442f; --accent-ink:#fff; --chip:#efe6d6; --ok:#2f7d5b; --okbg:#e3f2ea;
-  --c-kanko:#2f7d5b; --c-meshi:#c8442f; --c-onsen:#2f6fa8; --c-kai:#b07a12; --c-etc:#6d635a; --c-dart:#8a2be2;
+  --accent:#c8442f; --accent-ink:#fff; --chip:#efe6d6; --ok:#2f7d5b; --okbg:#e3f2ea; --want:#b0571f; --wantbg:#fbeadd;
+  --c-kanko:#2f7d5b; --c-meshi:#c8442f; --c-onsen:#2f6fa8; --c-kai:#b07a12; --c-etc:#6d635a;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
-    --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329;
-    --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-kai:#d9a43a; --c-etc:#9a8f82; --c-dart:#b47cf0;
+    --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329; --want:#eb9a62; --wantbg:#3a2a1e;
+    --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-kai:#d9a43a; --c-etc:#9a8f82;
   }
 }
 :root[data-theme="dark"]{
   --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
-  --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329;
-  --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-kai:#d9a43a; --c-etc:#9a8f82; --c-dart:#b47cf0;
+  --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329; --want:#eb9a62; --wantbg:#3a2a1e;
+  --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-kai:#d9a43a; --c-etc:#9a8f82;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -35,32 +35,33 @@ h1 span{color:var(--accent)}
 .meta{color:var(--sub);font-size:13px;margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:14px;text-decoration:none;cursor:pointer;font-family:inherit;white-space:nowrap;line-height:1.3}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
-.btn.small{padding:5px 10px;font-size:13px}
-.btn.on{background:var(--okbg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.btn.small{padding:6px 11px;font-size:13px}
 .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .note{color:var(--sub);font-size:13px}
 .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
 .err{background:#fde8e4;color:#7a1f10;border-color:#f3b8ab}
 
-.dart{border:0;padding:0;overflow:hidden;background:linear-gradient(135deg,#6a1fc2,#c8442f);color:#fff;box-shadow:0 6px 20px rgba(106,31,194,.3)}
-.dart .in{padding:16px 16px 14px}
-.dart .lbl{font-weight:700;font-size:14px;letter-spacing:.08em;opacity:.95}
-.dart h2{margin:4px 0 6px;font-size:30px;line-height:1.25;letter-spacing:.02em}
-.dart .sub2{opacity:.9;font-size:14px}
-.dart .btn{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.45);color:#fff}
-.dart .btn.go{background:#fff;color:#6a1fc2;border-color:#fff;font-weight:700;font-size:16px;padding:10px 22px}
-.dart .btn.ghost{background:transparent;border-color:transparent;color:#fff;opacity:.8;text-decoration:underline;padding:5px 4px}
-.dart iframe{display:block;width:100%;height:240px;border:0}
-.dart.dempty{text-align:center;padding:26px 16px}
-.dart.dempty h2{font-size:22px}
+/* 目的地 */
+.dest{border:0;padding:0;overflow:hidden;background:linear-gradient(135deg,#6a1fc2,#c8442f);color:#fff;box-shadow:0 6px 20px rgba(106,31,194,.3)}
+.dest .in{padding:16px 16px 14px}
+.dest .lbl{font-weight:700;font-size:14px;letter-spacing:.08em;opacity:.95}
+.dest h2{margin:4px 0 6px;font-size:30px;line-height:1.25;letter-spacing:.02em}
+.dest .sub2{opacity:.9;font-size:14px}
+.dest .btn{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.45);color:#fff}
+.dest .btn.go{background:#fff;color:#6a1fc2;border-color:#fff;font-weight:700;font-size:16px;padding:10px 22px}
+.dest iframe{display:block;width:100%;height:240px;border:0}
+.dest.wait{text-align:center;padding:24px 16px}
+.dest.wait h2{font-size:21px}
 
+/* タブ・絞り込み */
 .tabs{display:flex;gap:4px;background:var(--chip);border-radius:12px;padding:4px;margin:14px 0 8px;position:sticky;top:0;z-index:500}
 .tab{flex:1;border:0;background:transparent;color:var(--ink);font-family:inherit;font-size:14px;padding:8px 4px;border-radius:9px;cursor:pointer}
 .tab[aria-selected="true"]{background:var(--card);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
 .chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;font-family:inherit}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
+/* 地図 */
 #map{height:62vh;min-height:300px;border-radius:14px;border:1px solid var(--line);z-index:0}
 .pin{width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
 .pin i{transform:rotate(45deg);font-style:normal;color:#fff;font-size:13px;font-weight:700}
@@ -71,13 +72,17 @@ h1 span{color:var(--accent)}
 .dest-tip::before{border-top-color:#6a1fc2!important}
 .leaflet-popup-content{font-size:14px;margin:10px 12px}
 
+/* カード */
 .cards{display:grid;gap:10px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .card.focus{outline:2px solid var(--accent)}
 .card h3{font-size:16px;margin:0 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .tag{font-size:12px;font-weight:600;color:#fff;border-radius:6px;padding:1px 7px;flex:none}
-.badge{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--sub);flex:none}
+.edit{margin-left:auto;border:0;background:none;color:var(--sub);font-size:13px;cursor:pointer;padding:2px 4px;font-family:inherit}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin:3px 0}
+.badge{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--sub)}
 .badge.ok{color:var(--ok);border-color:var(--ok);background:var(--okbg);font-weight:600}
+.badge.want{color:var(--want);border-color:var(--want);background:var(--wantbg);font-weight:600}
 .dist{color:var(--sub);font-size:13px;font-weight:400}
 .desc{margin:4px 0}
 dl{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;margin:6px 0;font-size:13px}
@@ -85,34 +90,38 @@ dt{color:var(--sub)} dd{margin:0;overflow-wrap:anywhere}
 .by{color:var(--sub);font-size:12px}
 .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .gmap{width:100%;height:200px;border:0;border-radius:10px;margin-top:8px;display:block}
-.cmts{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;display:grid;gap:4px}
+.cmts{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;display:grid;gap:3px}
 .cmt{font-size:14px}
 .cmt b{font-size:13px}
-.cmt .t{color:var(--sub);font-size:12px}
 .empty{text-align:center;color:var(--sub);padding:28px 0}
 
-.log{border-left:3px solid var(--ok);padding:2px 0 2px 10px;margin:8px 0}
+.log{border-left:3px solid var(--ok);padding:2px 0 2px 10px;margin:10px 0}
 .log .t{color:var(--sub);font-size:12px}
 
+/* 追加ボタン・入力画面 */
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:1000;box-shadow:0 4px 14px rgba(0,0,0,.25);padding:12px 18px;font-size:15px}
 dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--card);color:var(--ink)}
 dialog::backdrop{background:rgba(0,0,0,.45)}
 dialog form{padding:16px}
-dialog h2{margin:0 0 10px;font-size:18px}
-label{display:block;font-size:13px;color:var(--sub);margin:10px 0 3px}
-input[type=text],input[type=url],input[type=number],textarea,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
-textarea{min-height:70px;resize:vertical}
+dialog h2{margin:0 0 4px;font-size:18px}
+label{display:block;font-size:13px;color:var(--sub);margin:12px 0 4px}
+input[type=text],textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+textarea{min-height:76px;resize:vertical}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .seg input{position:absolute;opacity:0;pointer-events:none}
-.seg label{margin:0;color:var(--ink);font-size:14px;border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:6px 12px;cursor:pointer}
+.seg label{margin:0;color:var(--ink);font-size:14px;border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:7px 13px;cursor:pointer}
 .seg input:checked+label{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.check{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:15px;margin-top:12px}
-.check input{width:20px;height:20px}
+.big2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.big2 input{position:absolute;opacity:0;pointer-events:none}
+.big2 label{margin:0;text-align:center;font-size:16px;font-weight:600;color:var(--ink);border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:14px 6px;cursor:pointer}
+.big2 input:checked+label.w{border-color:var(--want);background:var(--wantbg);color:var(--want)}
+.big2 input:checked+label.g{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+details.more summary{font-size:13px;color:var(--sub);margin-top:12px;cursor:pointer}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.dlg-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-.hint{font-size:12px;color:var(--sub);margin-top:2px}
+.dlg-acts{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:16px}
+.hint{font-size:12px;color:var(--sub);margin-top:3px}
 .toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;z-index:2000;max-width:calc(100vw - 32px)}
-details summary{cursor:pointer;color:var(--sub);font-size:13px}
+details.help summary{cursor:pointer;color:var(--sub);font-size:13px}
 </style>
 </head>
 <body>
@@ -127,7 +136,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:13px}
   </header>
 
   <div id="msg"></div>
-  <div id="dart"></div>
+  <div id="dest"></div>
 
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" data-tab="list" aria-selected="true">スポット</button>
@@ -136,8 +145,7 @@ details summary{cursor:pointer;color:var(--sub);font-size:13px}
   </div>
 
   <section id="p-list">
-    <div class="chips" id="typeChips"></div>
-    <div class="chips" id="subChips"></div>
+    <div class="chips" id="chips"></div>
     <div class="cards" id="list"></div>
   </section>
   <section id="p-map" hidden>
@@ -149,16 +157,12 @@ details summary{cursor:pointer;color:var(--sub);font-size:13px}
     <div id="log"></div>
   </section>
 
-  <details class="box" style="margin-top:24px">
-    <summary>使い方・設定</summary>
+  <details class="box help" style="margin-top:24px">
+    <summary>使い方</summary>
     <p class="note">
-    ・右下の「＋ スポット追加」から、見つけた観光地やお店を登録できます。住所かGoogleマップのリンクがあれば地図にピンが立ちます。<br>
-    ・各スポットの「💬 コメント」で「行きたい！」「しょぼかった」などを書けます。行ったら「✅ 行った」を押すと、行った記録に残ります。<br>
-    ・ダーツが刺さったら、いちばん上の「🎯 目的地を登録する」から登録します。<br>
-    ・名前と号車は一度入れるとこの端末に記憶されます。<br>
-    ・ページは1分ごとに自動で最新になります。間違えて登録したものは幹事に言ってください。</p>
-    <label for="carCount">車の台数（号車の選択肢になります）</label>
-    <div class="row"><input type="number" id="carCount" min="1" max="20" style="width:90px"><button class="btn small" id="saveCars">保存</button></div>
+    ・行った場所や気になる場所は「✍️ 行った・ひとこと」を押して、当てはまるものを選ぶだけ。ひとことや名前は書かなくても送れます。<br>
+    ・見つけた観光地やお店は、右下の「＋ スポット追加」から。名前だけでも登録できます。<br>
+    ・ページは1分ごとに自動で最新になります。</p>
   </details>
 </div>
 
@@ -169,7 +173,6 @@ details summary{cursor:pointer;color:var(--sub);font-size:13px}
 <script>
 /* ===== 設定 ===== */
 const SCRIPT_URL = "";   // Apps Script の「ウェブアプリのURL」を入れる
-const SHEET_ID = "16sbgEbDFIKZPAaduDGUpj8yQIkxpd27yWyjFr2yTsCM"; // Claudeに頼む文に使う
 /* ================ */
 const DEMO = !SCRIPT_URL || /[?&]demo/.test(location.search);
 
@@ -189,27 +192,27 @@ const store = {
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
 };
 
-let spots = [], darts = [], comments = [], settings = {};
-let tab = "list", typeF = "all", subF = "all", sortBy = "auto", me = null;
+let spots = [], dest = null, comments = [];
+let tab = "list", typeF = "all", nearMe = false, me = null;
 let map, layer, meMarker, fitted = false;
 const markers = {}, openMaps = new Set();
-const user = store.get("user", {name:"", car:""});
+let myName = store.get("myName", "");
 
-/* ---------- 通信 ---------- */
-/* お試しモード：この端末の中だけにデータを保存する */
+/* ---------- お試しモード（この端末の中だけに保存） ---------- */
 const DEMO_SEED = {
   "スポット":[
-    {"ID":"d01","日時":"2026/11/14 08:52","区分":"ダーツ","名前":"【お試し】埼玉県 秩父市","住所":"埼玉県秩父市","緯度":"35.9917","経度":"139.0856","ひとこと":"1投目！","追加した人":"幹事"},
+    {"ID":"d01","日時":"2026/11/14 08:52","区分":"ダーツ","名前":"【お試し】埼玉県 秩父市","住所":"埼玉県秩父市","緯度":"35.9917","経度":"139.0856"},
     {"ID":"s01","日時":"2026/11/14 09:20","区分":"スポット","名前":"【お試し】秩父神社","種類":"観光","住所":"埼玉県秩父市番場町1-3","緯度":"35.9975","経度":"139.0839","ひとこと":"秩父の総社。境内の彫刻が見どころ","値段":"無料","営業時間":"終日","駐車場":"あり","追加した人":"Claude"},
     {"ID":"s02","日時":"2026/11/14 09:21","区分":"スポット","名前":"【お試し】わらじかつ亭","種類":"飯","住所":"埼玉県秩父市番場町1-21","緯度":"35.9969","経度":"139.0851","ひとこと":"秩父名物わらじかつ丼","値段":"1,000〜1,500円","営業時間":"11:00〜15:00頃","駐車場":"わからない","追加した人":"Claude"},
     {"ID":"s03","日時":"2026/11/14 09:22","区分":"スポット","名前":"【お試し】祭の湯","種類":"温泉","住所":"埼玉県秩父市野坂町1-16-15","緯度":"35.9903","経度":"139.0858","ひとこと":"西武秩父駅直結の日帰り温泉","値段":"1,000円前後","営業時間":"10:00〜23:00","駐車場":"あり","追加した人":"Claude"},
-    {"ID":"s04","日時":"2026/11/14 09:40","区分":"スポット","名前":"【お試し】羊山公園","種類":"観光","住所":"埼玉県秩父市大宮6267","緯度":"35.9844","経度":"139.0927","ひとこと":"街を見下ろす公園","値段":"無料","営業時間":"終日","駐車場":"あり","追加した人":"たろう（2号車）"}],
+    {"ID":"s04","日時":"2026/11/14 09:40","区分":"スポット","名前":"【お試し】羊山公園","種類":"観光","住所":"埼玉県秩父市大宮6267","緯度":"35.9844","経度":"139.0927","ひとこと":"街を見下ろす公園","追加した人":"たろう"}],
   "コメント":[
-    {"ID":"k01","日時":"2026/11/14 09:30","スポットID":"s02","名前":"はなこ","号車":"1号車","行った":"","コメント":"ここ行きたい！"},
-    {"ID":"k02","日時":"2026/11/14 12:10","スポットID":"s01","名前":"たろう","号車":"2号車","行った":"はい","コメント":"彫刻すごかった"}],
-  "設定":[{"ID":"台数","値":"4"}],
+    {"ID":"k01","日時":"2026/11/14 09:30","スポットID":"s02","名前":"はなこ","行きたい":"はい","コメント":""},
+    {"ID":"k02","日時":"2026/11/14 09:31","スポットID":"s02","名前":"じろう","行きたい":"はい","コメント":"昼はここがいい！"},
+    {"ID":"k03","日時":"2026/11/14 12:10","スポットID":"s01","名前":"たろう","行った":"はい","コメント":"彫刻すごかった"}],
 };
-const demoDB = () => store.get("demoDB", null) || JSON.parse(JSON.stringify(DEMO_SEED));
+const today = (() => { const d = new Date(), z = n => String(n).padStart(2, "0"); return `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())}`; })();
+const demoDB = () => store.get("demoDB2", null) || JSON.parse(JSON.stringify(DEMO_SEED).replaceAll("2026/11/14", today));
 function demoApi(body){
   const db = demoDB(), list = db[body.sheet] = db[body.sheet] || [];
   const row = {...body.row};
@@ -217,15 +220,15 @@ function demoApi(body){
     row["ID"] = Math.random().toString(36).slice(2, 10);
     const d = new Date(), z = n => String(n).padStart(2, "0");
     row["日時"] = `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
-    if (body.sheet === "スポット" && !row["緯度"] && darts[0] && darts[0].ll){   // 本番は住所から位置を出す。お試しでは着地点の近くに置く
-      row["緯度"] = String(darts[0].ll[0] + (Math.random() - .5) * .04); row["経度"] = String(darts[0].ll[1] + (Math.random() - .5) * .04);
+    if (body.sheet === "スポット" && dest && dest.ll){   // 本番は住所から位置を出す。お試しでは目的地の近くに置く
+      row["緯度"] = String(dest.ll[0] + (Math.random() - .5) * .04); row["経度"] = String(dest.ll[1] + (Math.random() - .5) * .04);
     }
     list.push(row);
   } else {
     const x = list.find(o => o["ID"] === body.id);
-    x ? Object.assign(x, row) : list.push({"ID":body.id, ...row});
+    if (x) Object.assign(x, row);
   }
-  store.set("demoDB", db);
+  store.set("demoDB2", db);
   return {ok:true};
 }
 
@@ -242,9 +245,9 @@ async function load(){
   if (DEMO){
     ingest(demoDB()); render();
     $("#msg").innerHTML = `<div class="box" style="border-color:var(--c-kai)"><b>お試しモード</b>
-      <div class="note">追加・コメント・行ったを自由に試せます。書き込みはこの端末の中だけに保存され、ほかの人には見えません。</div>
-      <div class="acts"><button class="btn small" id="demoReset">お試しデータを最初の状態に戻す</button></div></div>`;
-    $("#demoReset").onclick = () => { store.set("demoDB", null); fitted = false; load(); toast("最初の状態に戻しました"); };
+      <div class="note">自由に触ってOK。書き込みはこの端末の中だけに保存され、ほかの人には見えません。</div>
+      <div class="acts"><button class="btn small" id="demoReset">最初の状態に戻す</button></div></div>`;
+    $("#demoReset").onclick = () => { store.set("demoDB2", null); fitted = false; load(); toast("最初の状態に戻しました"); };
     stamp("お試し ");
     return;
   }
@@ -258,36 +261,33 @@ async function load(){
   }catch(e){
     const c = store.get("cache", null);
     if (c && !spots.length){ ingest(c); render(); }
-    msg(c ? "電波が弱いため、前に読み込んだ内容を表示しています。「↻ 更新」で再読み込みできます。"
-          : "読み込めませんでした。電波の良いところで「↻ 更新」を押してください。");
+    msg(c ? "電波が弱いため、前に読み込んだ内容を表示しています。" : "読み込めませんでした。電波の良いところで「↻ 更新」を押してください。");
     $("#updated").textContent = "読み込み失敗";
   }
 }
 function ingest(d){
   const num = v => { const n = parseFloat(v); return isFinite(n) ? n : null; };
   const ts = s => Date.parse((s || "").replace(/\//g, "-").replace(" ", "T")) || 0;
+  const yes = v => /^(はい|TRUE|1|○|◯)$/i.test((v || "").trim());
   const all = (d["スポット"] || []).map((o, i) => ({
-    id:o["ID"] || "r" + i, time:o["日時"], ts:ts(o["日時"]), kind:o["区分"] || "スポット",
+    id:o["ID"] || "r" + i, ts:ts(o["日時"]), time:o["日時"], kind:o["区分"] || "スポット",
     name:o["名前"] || "", type:o["種類"] || "その他", addr:o["住所"] || "", url:o["GoogleマップURL"] || "",
     desc:o["ひとこと"] || "", price:o["値段"] || "", hours:o["営業時間"] || "", parking:o["駐車場"] || "",
     by:o["追加した人"] || "", ll:(num(o["緯度"]) != null && num(o["経度"]) != null) ? [num(o["緯度"]), num(o["経度"])] : null,
     hidden:/^(非表示|削除)$/.test(o["表示"] || ""),
   })).filter(o => !o.hidden && (o.name || o.addr));
   all.forEach(o => { if (!TYPES.some(T => T.key === o.type)) o.type = "その他"; });
-  darts = all.filter(o => o.kind === "ダーツ").sort((a, b) => b.ts - a.ts);
+  dest = all.filter(o => o.kind === "ダーツ").sort((a, b) => b.ts - a.ts)[0] || null;
   spots = all.filter(o => o.kind !== "ダーツ");
   comments = (d["コメント"] || []).map(o => ({
-    id:o["ID"], time:o["日時"], ts:ts(o["日時"]), spot:o["スポットID"], name:o["名前"] || "名無し",
-    car:o["号車"] || "", went:/^(はい|TRUE|1|行った)$/i.test(o["行った"] || ""), text:o["コメント"] || "",
+    id:o["ID"], ts:ts(o["日時"]), time:o["日時"], spot:o["スポットID"], name:(o["名前"] || "").trim(),
+    went:yes(o["行った"]), want:yes(o["行きたい"]), text:o["コメント"] || "",
   }));
-  settings = {};
-  (d["設定"] || []).forEach(o => settings[o["ID"]] = o["値"]);
-  $("#carCount").value = settings["台数"] || "";
 }
 function msg(t){ $("#msg").innerHTML = t ? `<div class="box err">${esc(t)}</div>` : ""; }
 function toast(t){
   const e = document.createElement("div"); e.className = "toast"; e.textContent = t;
-  document.body.appendChild(e); setTimeout(() => e.remove(), 2600);
+  document.body.appendChild(e); setTimeout(() => e.remove(), 2400);
 }
 
 /* ---------- 便利関数 ---------- */
@@ -303,86 +303,75 @@ const navUrl = o => "https://www.google.com/maps/dir/?api=1&travelmode=driving&d
 const gmapUrl = o => isUrl(o.url) ? o.url : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.ll ? o.ll.join(",") : (o.name + " " + o.addr));
 const embedUrl = (o, z) => "https://maps.google.com/maps?hl=ja&output=embed&z=" + z + "&q=" + encodeURIComponent(o.ll ? o.ll.join(",") : (o.addr || o.name));
 const hhmm = o => o.ts ? new Date(o.ts).toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}) : (o.time || "");
-const who = c => esc(c.name) + (c.car ? `<span class="note">（${esc(c.car)}）</span>` : "");
+const nameOf = c => c.name || "だれか";
 const cmtsOf = id => comments.filter(c => c.spot === id).sort((a, b) => a.ts - b.ts);
-const wentOf = id => comments.filter(c => c.spot === id && c.went);
+// 同じ人の重複は1回と数える（名前なしは1件ずつ）
+const countBy = (id, key) => new Set(comments.filter(c => c.spot === id && c[key]).map((c, i) => c.name || "#" + i)).size;
 
 /* ---------- 描画 ---------- */
-function render(){ if (sortBy === "auto" || (sortBy === "dart" && !(darts[0] && darts[0].ll))) sortBy = (darts[0] && darts[0].ll) ? "dart" : "new"; renderDart(); renderChips(); renderList(); renderLog(); if (tab === "map") renderMap(); }
+function render(){ renderDest(); renderChips(); renderList(); renderLog(); if (tab === "map") renderMap(); }
 
-function renderDart(){
-  const d = darts[0];
-  if (!d){
-    $("#dart").innerHTML = `<div class="box dart dempty">
-      <div class="lbl">🎯 今日の目的地</div>
-      <h2>ダーツを投げたら<br>ここに登録！</h2>
-      <div class="acts" style="justify-content:center"><button class="btn go" data-act="dart">🎯 目的地を登録する</button></div></div>`;
+function renderDest(){
+  if (!dest){
+    $("#dest").innerHTML = `<div class="box dest wait"><div class="lbl">🎯 今日の目的地</div>
+      <h2>ダーツが刺さったら<br>ここに出ます</h2></div>`;
     return;
   }
-  $("#dart").innerHTML = `<div class="box dart"><div class="in">
+  $("#dest").innerHTML = `<div class="box dest"><div class="in">
       <div class="lbl">🎯 今日の目的地</div>
-      <h2>${esc(d.name)}</h2>
-      ${d.desc ? `<div class="sub2">${esc(d.desc)}</div>` : ""}
-      ${d.addr && !isUrl(d.addr) && d.addr !== d.name ? `<div class="sub2">${esc(d.addr)}</div>` : ""}
+      <h2>${esc(dest.name)}</h2>
+      ${dest.desc ? `<div class="sub2">${esc(dest.desc)}</div>` : ""}
+      ${dest.addr && !isUrl(dest.addr) && dest.addr !== dest.name ? `<div class="sub2">${esc(dest.addr)}</div>` : ""}
       <div class="acts" style="margin-top:12px">
-        <a class="btn go" target="_blank" rel="noopener" href="${navUrl(d)}">🚗 ナビ開始</a>
-        <a class="btn" target="_blank" rel="noopener" href="${esc(gmapUrl(d))}">Googleマップ</a>
-      </div>
-      <div class="acts">
-        <button class="btn small" data-act="claude">🤖 周辺をClaudeに調べてもらう文をコピー</button>
-        <button class="btn small ghost" data-act="dartEdit">直す</button>
+        <a class="btn go" target="_blank" rel="noopener" href="${navUrl(dest)}">🚗 ナビ開始</a>
+        <a class="btn" target="_blank" rel="noopener" href="${esc(gmapUrl(dest))}">Googleマップ</a>
       </div>
     </div>
-    <iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${embedUrl(d, 11)}" title="目的地の地図"></iframe></div>`;
+    <iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${embedUrl(dest, 11)}" title="目的地の地図"></iframe></div>`;
 }
 
 function renderChips(){
   const counts = {};
   spots.forEach(o => counts[o.type] = (counts[o.type] || 0) + 1);
-  const chip = (k, label, on) => `<button class="chip" data-type="${esc(k)}" aria-pressed="${on}">${label}</button>`;
-  const html = chip("all", "すべて " + spots.length, typeF === "all") +
-    TYPES.filter(T => counts[T.key]).map(T => chip(T.key, T.key + " " + counts[T.key], typeF === T.key)).join("");
-  $("#typeChips").innerHTML = html; $("#mapChips").innerHTML = html;
-  const sub = [["all","全部"],["not","まだ"],["went","行った"]].map(([k,l]) =>
-    `<button class="chip" data-sub="${k}" aria-pressed="${subF===k}">${l}</button>`).join("");
-  const sorts = [["new","新しい順"],["dart","目的地から近い順"],["near","現在地から近い順"]].filter(([k]) => k !== "dart" || (darts[0] && darts[0].ll))
-    .map(([k,l]) => `<button class="chip" data-sort="${k}" aria-pressed="${sortBy===k}">${l}</button>`).join("");
-  $("#subChips").innerHTML = sub + `<span style="flex:none;width:6px"></span>` + sorts;
+  const chip = (k, label) => `<button class="chip" data-type="${esc(k)}" aria-pressed="${typeF === k}">${label}</button>`;
+  const types = chip("all", "すべて " + spots.length) + TYPES.filter(T => counts[T.key]).map(T => chip(T.key, T.key + " " + counts[T.key])).join("");
+  $("#chips").innerHTML = types + `<button class="chip" data-near="1" aria-pressed="${nearMe}">📍 今いる所から近い順</button>`;
+  $("#mapChips").innerHTML = types;
 }
 
-function filtered(){
-  let v = spots.filter(o => typeF === "all" || o.type === typeF);
-  if (subF !== "all") v = v.filter(o => (wentOf(o.id).length > 0) === (subF === "went"));
-  return v;
-}
-function origin(){ return sortBy === "near" ? me : sortBy === "dart" ? (darts[0] && darts[0].ll) : null; }
+const filtered = () => spots.filter(o => typeF === "all" || o.type === typeF);
+const origin = () => (nearMe && me) ? me : (dest && dest.ll);
 
 function renderList(){
   const v = filtered(), o0 = origin();
   if (o0) v.sort((a, b) => (a.ll ? km(o0, a.ll) : 1e9) - (b.ll ? km(o0, b.ll) : 1e9));
   else v.sort((a, b) => b.ts - a.ts);
   if (!v.length){
-    $("#list").innerHTML = `<div class="empty">${spots.length ? "条件に合うスポットがありません" : "まだスポットがありません。<br>見つけたら「＋ スポット追加」から登録してください。"}</div>`;
+    $("#list").innerHTML = `<div class="empty">${spots.length ? "このジャンルはまだありません" : "まだスポットがありません。<br>見つけたら「＋ スポット追加」から登録してね。"}</div>`;
     return;
   }
   $("#list").innerHTML = v.map(o => {
-    const went = wentOf(o.id), cs = cmtsOf(o.id);
-    const dist = (o0 && o.ll) ? `<span class="dist">約${km(o0, o.ll).toFixed(1)}km</span>` : "";
-    const park = o.parking ? `<span class="badge">🅿 駐車場 ${esc(o.parking)}</span>` : "";
+    const went = countBy(o.id, "went"), want = countBy(o.id, "want"), cs = cmtsOf(o.id);
+    const dist = (o0 && o.ll) ? `<span class="dist">${nearMe ? "今いる所から" : "目的地から"}約${km(o0, o.ll).toFixed(1)}km</span>` : "";
+    const badges = [
+      o.parking ? `<span class="badge">🅿 駐車場 ${esc(o.parking)}</span>` : "",
+      want ? `<span class="badge want">🙋 行きたい ${want}</span>` : "",
+      went ? `<span class="badge ok">✅ 行った ${went}</span>` : ""].join("");
     const info = [["値段", o.price], ["営業", o.hours], ["住所", isUrl(o.addr) ? "" : o.addr]].filter(x => x[1]);
-    const mine = user.name && went.some(c => c.name === user.name);
+    const lines = cs.filter(c => c.text || c.went || c.want).map(c =>
+      `<div class="cmt">${c.went ? "✅" : c.want ? "🙋" : "💬"} <b>${esc(nameOf(c))}</b>${c.text ? "：" + esc(c.text) : c.went ? " 行った" : " 行きたい"}</div>`);
     return `<article class="card" id="c-${esc(o.id)}">
-      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)} ${dist}<button class="btn small" style="margin-left:auto;padding:2px 8px" data-act="edit" data-id="${esc(o.id)}" aria-label="直す">✏️</button></h3>
-      ${park || went.length ? `<div class="row" style="margin:2px 0">${park}${went.length ? `<span class="badge ok">✅ 行った ${went.length}</span>` : ""}</div>` : ""}
+      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)}
+        <button class="edit" data-act="edit" data-id="${esc(o.id)}">✏️ 直す</button></h3>
+      ${badges ? `<div class="badges">${badges}</div>` : ""}
+      ${dist ? `<div>${dist}</div>` : ""}
       ${o.desc ? `<div class="desc">${esc(o.desc)}</div>` : ""}
       ${info.length ? `<dl>${info.map(([k, x]) => `<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>` : ""}
-      <div class="by">${o.by ? esc(o.by) + "が追加・" : ""}${esc(hhmm(o))}</div>
-      ${cs.length ? `<div class="cmts">${cs.map(c => `<div class="cmt">${c.went ? "✅ " : "💬 "}<b>${who(c)}</b> ${esc(c.text)} <span class="t">${esc(hhmm(c))}</span></div>`).join("")}</div>` : ""}
+      ${lines.length ? `<div class="cmts">${lines.join("")}</div>` : ""}
       <div class="acts">
-        <button class="btn small" data-act="cmt" data-id="${esc(o.id)}">💬 コメント</button>
-        <button class="btn small ${mine ? "on" : ""}" data-act="went" data-id="${esc(o.id)}">${mine ? "✅ 行った済み" : "✅ 行った"}</button>
+        <button class="btn small primary" data-act="react" data-id="${esc(o.id)}">✍️ 行った・ひとこと</button>
         <button class="btn small" data-act="gmap" data-id="${esc(o.id)}">${openMaps.has(o.id) ? "地図を閉じる" : "🗺 地図"}</button>
-        <a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a>
+        <a class="btn small" target="_blank" rel="noopener" href="${navUrl(o)}">🚗 ナビ</a>
       </div>
       ${openMaps.has(o.id) ? `<iframe class="gmap" loading="lazy" src="${embedUrl(o, 15)}" title="${esc(o.name)}の地図"></iframe>
         <div class="acts"><a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(o))}">Googleマップで開く</a></div>` : ""}
@@ -393,11 +382,11 @@ function renderList(){
 function renderLog(){
   const byId = Object.fromEntries(spots.map(o => [o.id, o]));
   const items = comments.filter(c => c.went && byId[c.spot]).map(c => ({ts:c.ts, html:`<div class="log"><span class="t">${esc(hhmm(c))}</span><br>
-      ✅ <b>${esc(byId[c.spot].name)}</b> <span class="note">${esc(byId[c.spot].type)}</span><br>${who(c)}${c.text ? "：" + esc(c.text) : ""}</div>`}));
-  const dItems = darts.map(d => ({ts:d.ts, html:`<div class="log" style="border-color:var(--c-dart)"><span class="t">${esc(hhmm(d))}</span><br>🎯 <b>目的地決定：${esc(d.name)}</b></div>`}));
-  const all = [...items, ...dItems].sort((a, b) => b.ts - a.ts);
-  $("#log").innerHTML = all.length ? all.map(x => x.html).join("") :
-    `<div class="empty">まだ記録がありません。<br>スポットで「✅ 行った」を押すとここに残ります。</div>`;
+      ✅ <b>${esc(byId[c.spot].name)}</b> <span class="note">${esc(byId[c.spot].type)}</span><br>${esc(nameOf(c))}${c.text ? "：" + esc(c.text) : ""}</div>`}));
+  if (dest) items.push({ts:dest.ts, html:`<div class="log" style="border-color:#6a1fc2"><span class="t">${esc(hhmm(dest))}</span><br>🎯 <b>目的地決定：${esc(dest.name)}</b></div>`});
+  items.sort((a, b) => b.ts - a.ts);
+  $("#log").innerHTML = items.length ? items.map(x => x.html).join("") :
+    `<div class="empty">まだ記録がありません。<br>スポットの「✍️ 行った・ひとこと」で「行った」を選ぶとここに残ります。</div>`;
 }
 
 function pin(color, label, big){
@@ -419,38 +408,31 @@ function renderMap(){
   const pts = [];
   filtered().forEach(o => {
     if (!o.ll) return;
-    const went = wentOf(o.id).length;
-    markers[o.id] = L.marker(o.ll, {icon:pin(typeColor(o.type), went ? "✓" : "")})
+    markers[o.id] = L.marker(o.ll, {icon:pin(typeColor(o.type), countBy(o.id, "went") ? "✓" : "")})
       .bindPopup(`<b>${esc(o.name)}</b> <span class="note">${esc(o.type)}</span>${o.desc ? "<br>" + esc(o.desc) : ""}
         <div class="acts"><button class="btn small" data-act="goto" data-id="${esc(o.id)}">詳しく</button>
         <a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a></div>`)
       .addTo(layer);
     pts.push(o.ll);
   });
-  darts.forEach((d, i) => {
-    if (!d.ll) return;
-    if (i > 0) return;
-    L.marker(d.ll, {icon:pin(cssVar("--c-dart"), "🎯", true), zIndexOffset:1000})
-      .bindTooltip("🎯 " + d.name, {permanent:true, direction:"top", offset:[0, -36], className:"dest-tip"})
-      .bindPopup(`<b>🎯 ${esc(d.name)}</b><div class="acts"><a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(d)}">ナビ</a></div>`).addTo(layer);
-    pts.push(d.ll);
-  });
-  if (me) pts.push(me);
+  if (dest && dest.ll){
+    L.marker(dest.ll, {icon:pin("#6a1fc2", "🎯", true), zIndexOffset:1000})
+      .bindTooltip("🎯 " + dest.name, {permanent:true, direction:"top", offset:[0, -36], className:"dest-tip"})
+      .bindPopup(`<b>🎯 ${esc(dest.name)}</b><div class="acts"><a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(dest)}">ナビ</a></div>`).addTo(layer);
+    pts.push(dest.ll);
+  }
+  if (me){
+    meMarker = L.marker(me, {icon:L.divIcon({className:"", html:'<div class="me"></div>', iconSize:[16, 16], iconAnchor:[8, 8]})}).addTo(layer);
+    pts.push(me);
+  }
   if (!fitted && pts.length){ map.fitBounds(pts, {padding:[30, 30], maxZoom:14}); fitted = true; }
 }
 
-/* ---------- 入力ダイアログ ---------- */
-function carOptions(sel){
-  const n = Math.max(0, Math.min(20, parseInt(settings["台数"]) || 0));
-  const list = n ? Array.from({length:n}, (_, i) => (i + 1) + "号車") : [];
-  if (sel && !list.includes(sel)) list.push(sel);
-  return `<option value="">（選ばない）</option>` + list.map(c => `<option ${c === sel ? "selected" : ""}>${esc(c)}</option>`).join("");
-}
-const whoFields = () => `<div class="two">
-  <div><label>あなたの名前 *</label><input type="text" name="name" required maxlength="20" value="${esc(user.name)}"></div>
-  <div><label>号車</label><select name="car">${carOptions(user.car)}</select></div></div>`;
+/* ---------- 入力画面 ---------- */
 const seg = (name, opts, sel) => `<div class="seg">${opts.map((o, i) =>
   `<input type="radio" id="${name}${i}" name="${name}" value="${esc(o)}" ${o === sel ? "checked" : ""}><label for="${name}${i}">${esc(o)}</label>`).join("")}</div>`;
+const nameField = () => `<label>あなたの名前（なくてもOK）</label>
+  <input type="text" name="who" maxlength="20" value="${esc(myName)}" placeholder="例：たろう">`;
 
 function openDialog(html, onSubmit, okLabel = "送る"){
   const f = $("#dlgForm");
@@ -460,106 +442,80 @@ function openDialog(html, onSubmit, okLabel = "送る"){
   f.onsubmit = async e => {
     e.preventDefault();
     const fd = Object.fromEntries(new FormData(f));
-    if (fd.name !== undefined){ user.name = fd.name.trim(); user.car = fd.car || ""; store.set("user", user); }
+    for (const k in fd) fd[k] = String(fd[k]).trim();
+    if ("who" in fd){ myName = fd.who; store.set("myName", myName); }
     const ok = $("#dlgOk"); ok.disabled = true; ok.textContent = "送信中…";
-    try{ await onSubmit(fd); $("#dlg").close(); await load(); }
-    catch(err){ ok.disabled = false; ok.textContent = okLabel; if (err.message !== "キャンセルしました") alert("送れませんでした：" + err.message + "\n電波を確認してもう一度試してください。"); }
+    try{
+      const r = await onSubmit(fd);
+      if (r === false){ ok.disabled = false; ok.textContent = okLabel; return; }
+      $("#dlg").close(); await load();
+    }catch(err){
+      ok.disabled = false; ok.textContent = okLabel;
+      alert("送れませんでした。電波を確認してもう一度押してください。");
+    }
   };
   $("#dlg").showModal();
 }
-function needScript(){ return false; }
-const byLabel = fd => fd.name + (fd.car ? "（" + fd.car + "）" : "");
+
+// 行った・行きたい・ひとことを1回でまとめて送る（どれか1つあればOK）
+function react(id){
+  const o = spots.find(s => s.id === id); if (!o) return;
+  openDialog(`<h2>${esc(o.name)}</h2>
+    <div class="big2">
+      <input type="checkbox" id="rWant" name="want"><label class="w" for="rWant">🙋 行きたい</label>
+      <input type="checkbox" id="rWent" name="went"><label class="g" for="rWent">✅ 行った</label>
+    </div>
+    <label>ひとこと（なくてもOK）</label>
+    <textarea name="text" maxlength="300" placeholder="例：わらじかつ最高！／ちょっとしょぼかった"></textarea>
+    ${nameField()}
+    <div id="rHint" class="hint" style="color:var(--accent);font-size:14px"></div>`, fd => {
+      if (!fd.want && !fd.went && !fd.text){ $("#rHint").textContent = "「行きたい」「行った」を選ぶか、ひとこと書いてね"; return false; }
+      return api({sheet:"コメント", action:"append", row:{
+        "スポットID":id, "名前":fd.who, "行った":fd.went ? "はい" : "", "行きたい":fd.want && !fd.went ? "はい" : "", "コメント":fd.text}})
+        .then(() => toast("送りました！"));
+    });
+  // 「行った」を選んだら「行きたい」は外す（逆も同じ）
+  $("#rWant").onchange = () => { if ($("#rWant").checked) $("#rWent").checked = false; };
+  $("#rWent").onchange = () => { if ($("#rWent").checked) $("#rWant").checked = false; };
+}
 
 const norm = t => (t || "").replace(/【.*?】|\s/g, "").toLowerCase();
-function addSpot(){ spotDialog(null); }
 function spotDialog(o){
-  const v = o || {type:"飯", parking:""};
+  const v = o || {};
+  const place = v.url && !v.addr ? v.url : v.addr || v.url || "";
   openDialog(`<h2>${o ? "✏️ スポットを直す" : "＋ スポット追加"}</h2>
-    <label>名前 *</label><input type="text" name="spot" required maxlength="60" value="${esc(v.name)}" placeholder="例：〇〇食堂、△△城跡">
+    <div class="hint">名前だけでも登録できます</div>
+    <label>名前</label><input type="text" name="spot" required maxlength="60" value="${esc(v.name)}" placeholder="例：〇〇食堂、△△城跡">
     <label>種類</label>${seg("type", TYPES.map(T => T.key), v.type)}
-    <label>住所</label><input type="text" name="addr" value="${esc(v.addr)}" placeholder="例：埼玉県秩父市番場町1-3">
-    <label>Googleマップのリンク</label><input type="url" name="url" value="${esc(v.url)}" placeholder="https://maps.app.goo.gl/…">
-    <div class="hint">住所かリンクのどちらかがあれば地図にピンが立ちます</div>
+    <label>場所（住所かGoogleマップのリンク）</label><input type="text" name="place" value="${esc(place)}" placeholder="貼り付けるだけでOK">
     <label>ひとこと</label><textarea name="desc" placeholder="名物、おすすめポイントなど">${esc(v.desc)}</textarea>
-    <div class="two"><div><label>値段の目安</label><input type="text" name="price" value="${esc(v.price)}" placeholder="例：1,000円くらい"></div>
-    <div><label>営業時間</label><input type="text" name="hours" value="${esc(v.hours)}" placeholder="例：11〜20時"></div></div>
     <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], v.parking)}
-    ${o ? `<div class="hint" style="margin-top:12px">追加した人：${esc(o.by || "不明")}</div>
-      <div class="acts"><button type="button" class="btn small" id="delSpot" style="color:var(--accent)">🗑 このスポットを消す</button></div>` : whoFields()}`,
+    <details class="more" ${v.price || v.hours ? "open" : ""}><summary>値段・営業時間も書く</summary>
+      <div class="two"><div><label>値段の目安</label><input type="text" name="price" value="${esc(v.price)}" placeholder="例：1,000円くらい"></div>
+      <div><label>営業時間</label><input type="text" name="hours" value="${esc(v.hours)}" placeholder="例：11〜20時"></div></div></details>
+    ${o ? `<div class="acts" style="margin-top:14px"><button type="button" class="btn small" id="delSpot" style="color:var(--accent)">🗑 このスポットを消す</button></div>` : nameField()}`,
     fd => {
-      const row = {"名前":fd.spot, "種類":fd.type || "その他", "住所":fd.addr, "GoogleマップURL":fd.url,
-        "ひとこと":fd.desc, "値段":fd.price, "営業時間":fd.hours, "駐車場":fd.parking || ""};
+      const url = isUrl(fd.place) ? fd.place : "", addr = isUrl(fd.place) ? "" : fd.place;
+      const row = {"名前":fd.spot, "種類":fd.type || "その他", "住所":addr, "GoogleマップURL":url,
+        "ひとこと":fd.desc, "値段":fd.price || "", "営業時間":fd.hours || "", "駐車場":fd.parking || ""};
       if (!o){
         const dup = spots.find(x => norm(x.name) === norm(fd.spot));
-        if (dup && !confirm(`「${dup.name}」はもう登録されています。それでも追加しますか？`)) return Promise.reject(new Error("キャンセルしました"));
-        return api({sheet:"スポット", action:"append", row:{"区分":"スポット", ...row, "追加した人":byLabel(fd)}}).then(() => toast("追加しました"));
+        if (dup && !confirm(`「${dup.name}」はもう登録されています。それでも追加しますか？`)) return false;
+        return api({sheet:"スポット", action:"append", row:{"区分":"スポット", ...row, "追加した人":fd.who}}).then(() => toast("追加しました！"));
       }
-      if (fd.addr !== o.addr || fd.url !== o.url){ row["緯度"] = ""; row["経度"] = ""; }   // 場所が変わったら位置を取り直す
+      if (addr !== o.addr || url !== o.url){ row["緯度"] = ""; row["経度"] = ""; }   // 場所が変わったら位置を取り直す
       return api({sheet:"スポット", action:"update", id:o.id, row}).then(() => toast("直しました"));
-    });
+    }, o ? "直す" : "追加");
   if (o) $("#delSpot").onclick = async () => {
     if (!confirm(`「${o.name}」を消しますか？`)) return;
     try{ await api({sheet:"スポット", action:"update", id:o.id, row:{"表示":"非表示"}}); $("#dlg").close(); toast("消しました"); load(); }
     catch(e){ alert("消せませんでした"); }
   };
 }
-function addDart(){
-  const d = darts[0];
-  openDialog(`<h2>🎯 ${d ? "目的地を直す" : "今日の目的地を登録"}</h2>
-    <label>地名 *</label><input type="text" name="spot" required maxlength="60" value="${esc(d ? d.name : "")}" placeholder="例：群馬県 みなかみ町">
-    <label>住所や目印</label><input type="text" name="addr" value="${esc(d && d.addr !== d.name ? d.addr : "")}" placeholder="例：群馬県利根郡みなかみ町">
-    <label>Googleマップのリンク</label><input type="url" name="url" value="${esc(d ? d.url : "")}" placeholder="https://maps.app.goo.gl/…">
-    <label>ひとこと</label><input type="text" name="desc" value="${esc(d ? d.desc : "")}" placeholder="例：刺さったのは山のど真ん中！">
-    ${d ? "" : whoFields()}`, fd => {
-      const row = {"名前":fd.spot, "住所":fd.addr || fd.spot, "GoogleマップURL":fd.url, "ひとこと":fd.desc};
-      if (!d) return api({sheet:"スポット", action:"append", row:{"区分":"ダーツ", ...row, "追加した人":byLabel(fd)}})
-        .then(() => { sortBy = "dart"; toast("目的地を登録しました！"); });
-      if (row["住所"] !== d.addr || fd.url !== d.url){ row["緯度"] = ""; row["経度"] = ""; }
-      return api({sheet:"スポット", action:"update", id:d.id, row}).then(() => toast("直しました"));
-    }, d ? "直す" : "登録");
-}
-function addComment(id, went){
-  if (needScript()) return;
-  const o = spots.find(s => s.id === id); if (!o) return;
-  openDialog(`<h2>${went ? "✅ 行った！" : "💬 コメント"}</h2>
-    <div class="note">${esc(o.name)}</div>
-    <label>コメント${went ? "（感想があれば）" : " *"}</label>
-    <textarea name="text" ${went ? "" : "required"} maxlength="300" placeholder="${went ? "例：わらじかつ最高だった" : "例：ここ行きたい！／しょぼかったよ"}"></textarea>
-    <label class="check"><input type="checkbox" name="went" ${went ? "checked" : ""}> ここに行った</label>
-    ${whoFields()}`, fd => api({sheet:"コメント", action:"append", row:{
-      "スポットID":id, "名前":fd.name, "号車":fd.car, "行った":fd.went ? "はい" : "", "コメント":fd.text}})
-      .then(() => toast(fd.went ? "行った記録に残しました" : "コメントしました")));
-}
-
-function claudeText(){
-  const d = darts[0];
-  return `Googleスプレッドシート「ダーツの旅 スポット帳」（ID: ${SHEET_ID}）の「スポット」タブに、${d.name}${d.addr && d.addr !== d.name ? "（" + d.addr + "）" : ""}周辺の観光地・飯屋・日帰り温泉を、合わせて10件ほど調べて追加してください。
-
-・1件を1行にして、いちばん下に追記する（今ある行は消したり変えたりしない）
-・列は1行目の見出しに合わせる
-　ID：「c」＋英数字6文字（ほかの行と重ならないもの）
-　日時：今の日時（yyyy/MM/dd HH:mm）
-　区分：スポット
-　名前、種類（観光／飯／温泉／買い物・休憩／その他のどれか）
-　住所、緯度・経度（数字）、GoogleマップURL（わかれば）
-　ひとこと（名物や見どころを短く）、値段、営業時間（今日の曜日の時間）
-　駐車場（あり／なし／わからない）、追加した人：Claude
-・19人のサークルで車で移動するので、駐車場がある所と、大人数でも入りやすい所を優先する
-・今日やっていない店は入れない。同じ名前の行がすでにあれば追加しない
-・追加したら、名前と種類の一覧を返す`;
-}
-async function copyClaude(){
-  const t = claudeText();
-  try{ await navigator.clipboard.writeText(t); toast("コピーしました。Claudeのアプリに貼り付けてください"); }
-  catch(e){
-    openDialog(`<h2>🤖 Claudeに頼む文</h2><div class="note">長押しでコピーして、Claudeのアプリに貼り付けてください。</div>
-      <textarea readonly style="min-height:260px;font-size:14px">${esc(t)}</textarea>`, () => Promise.resolve(), "閉じる");
-  }
-}
 
 /* ---------- 操作 ---------- */
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-tab],[data-type],[data-sub],[data-sort],[data-act]");
+  const t = e.target.closest("[data-tab],[data-type],[data-near],[data-act]");
   if (!t) return;
   if (t.dataset.tab){
     tab = t.dataset.tab;
@@ -569,24 +525,14 @@ document.addEventListener("click", e => {
     return;
   }
   if (t.dataset.type){ typeF = t.dataset.type; fitted = false; render(); return; }
-  if (t.dataset.sub){ subF = t.dataset.sub; fitted = false; render(); return; }
-  if (t.dataset.sort){
-    const k = t.dataset.sort;
-    if (k === "near" && !me){ locateMe(() => { sortBy = "near"; render(); }); return; }
-    sortBy = k; render(); return;
+  if (t.dataset.near){
+    if (nearMe){ nearMe = false; render(); return; }
+    locateMe(() => { nearMe = true; render(); });
+    return;
   }
   const id = t.dataset.id, act = t.dataset.act;
-  if (act === "dart" || act === "dartEdit") addDart();
-  else if (act === "cmt") addComment(id, false);
-  else if (act === "went"){
-    const mine = user.name && wentOf(id).filter(c => c.name === user.name);
-    if (mine && mine.length){
-      if (confirm("「行った」を取り消しますか？（コメントは残ります）"))
-        Promise.all(mine.map(c => api({sheet:"コメント", action:"update", id:c.id, row:{"行った":""}}))).then(() => { toast("取り消しました"); load(); });
-    } else addComment(id, true);
-  }
+  if (act === "react") react(id);
   else if (act === "edit"){ const o = spots.find(x => x.id === id); o && spotDialog(o); }
-  else if (act === "claude") copyClaude();
   else if (act === "gmap"){ openMaps.has(id) ? openMaps.delete(id) : openMaps.add(id); renderList(); }
   else if (act === "goto"){
     $('[data-tab="list"]').click();
@@ -596,23 +542,12 @@ document.addEventListener("click", e => {
 });
 function locateMe(done){
   if (!navigator.geolocation){ alert("この端末では現在地が使えません"); return; }
-  toast("現在地を取得中…");
-  navigator.geolocation.getCurrentPosition(p => {
-    me = [p.coords.latitude, p.coords.longitude];
-    if (map){ meMarker && meMarker.remove();
-      meMarker = L.marker(me, {icon:L.divIcon({className:"", html:'<div class="me"></div>', iconSize:[16, 16], iconAnchor:[8, 8]})}).addTo(map); }
-    done();
-  }, () => alert("現在地を取得できませんでした（位置情報の許可を確認してください）"), {enableHighAccuracy:true, timeout:10000});
+  toast("現在地を確認中…");
+  navigator.geolocation.getCurrentPosition(p => { me = [p.coords.latitude, p.coords.longitude]; done(); },
+    () => alert("現在地がわかりませんでした（位置情報の許可を確認してください）"), {enableHighAccuracy:true, timeout:10000});
 }
-$("#addBtn").onclick = addSpot;
+$("#addBtn").onclick = () => spotDialog(null);
 $("#reload").onclick = load;
-$("#saveCars").onclick = async () => {
-  if (needScript()) return;
-  const n = parseInt($("#carCount").value);
-  if (!(n >= 1 && n <= 20)){ alert("1〜20の数字を入れてください"); return; }
-  try{ await api({sheet:"設定", action:"update", id:"台数", row:{"値":String(n)}}); toast("台数を " + n + " 台にしました"); load(); }
-  catch(e){ alert("保存できませんでした"); }
-};
 
 load();
 setInterval(() => { if (!document.hidden && !$("#dlg").open) load(); }, 60000);
