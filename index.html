@@ -496,13 +496,12 @@ function splitPaste(s){
 function spotDialog(o){
   const v = o || {};
   const area = dest ? dest.name.replace(/【.*?】/g, "") : "";
+  const curName = o && !/^（名前なし/.test(v.name) ? v.name : "";
   openDialog(`<h2>${o ? "✏️ スポットを直す" : "＋ スポット追加"}</h2>
-    ${o ? `<label>名前</label><input type="text" name="name" value="${esc(v.name)}" maxlength="60">
-      <label>Googleマップのリンク</label><input type="text" name="url" value="${esc(v.url)}" placeholder="https://maps.app.goo.gl/…">`
-    : `<label>Googleマップのリンク、または名前</label>
-      <input type="text" name="paste" id="paste" placeholder="リンクを貼るか、名前を打つだけでOK" autocomplete="off">
-      <div class="acts"><a class="btn small" id="gsearch" target="_blank" rel="noopener" href="#">🔍 Googleマップで探す</a></div>
-      <div class="hint">Googleマップでお店を開いて「共有」→「リンクをコピー」して貼ると、名前と場所が自動で入ります</div>`}
+    <label>名前</label><input type="text" name="name" id="fName" value="${esc(curName)}" maxlength="60" placeholder="例：〇〇食堂、△△城跡" autocomplete="off">
+    <label>Googleマップのリンク（あれば）</label><input type="text" name="url" id="fUrl" value="${esc(v.url)}" placeholder="https://maps.app.goo.gl/…" autocomplete="off">
+    ${o ? "" : `<div class="acts"><a class="btn small" id="gsearch" target="_blank" rel="noopener" href="#">🔍 Googleマップで探す</a></div>
+      <div class="hint">Googleマップでお店を開いて「共有」→「リンクをコピー」で貼ると、場所がピッタリ合います</div>`}
     <label>種類（なくてもOK）</label>${seg("type", TYPES.map(T => T.key), v.type && v.type !== "その他" ? v.type : (o ? "その他" : ""))}
     <label>説明（なくてもOK）</label><textarea name="desc" placeholder="名物、おすすめポイントなど">${esc(v.desc)}</textarea>
     <details class="opt" ${o && (v.parking || v.price || v.hours || v.addr) ? "open" : ""}><summary>詳しく（駐車場・値段・営業時間・住所）</summary>
@@ -511,23 +510,30 @@ function spotDialog(o){
       <div><label>営業時間</label><input type="text" name="hours" value="${esc(v.hours)}" placeholder="例：11〜20時"></div></div>
       <label>住所</label><input type="text" name="addr" value="${esc(v.addr)}"></details>`,
     fd => {
+      // 名前の欄にリンクごと貼られたら、リンクと名前に分ける
+      const p1 = splitPaste(fd.name), p2 = splitPaste(fd.url);
+      const url = p2.url || p1.url || "";
+      const name = (p1.url ? p1.name : fd.name) || (p2.url ? p2.name : "");
+      if (!name) return warn("名前を入れてね（リンクだけだと名前が取れないことがあります）");
       const extra = {"種類":fd.type || "その他", "ひとこと":fd.desc, "駐車場":fd.parking || "", "値段":fd.price, "営業時間":fd.hours, "住所":fd.addr};
       if (o){
-        const url = isUrl(fd.url) ? splitPaste(fd.url).url : "";
-        const row = {"名前":fd.name || o.name, "GoogleマップURL":url, ...extra, "更新した人":me, "更新日時":nowStr()};
-        if (url !== o.url || fd.addr !== o.addr){ row["緯度"] = ""; row["経度"] = ""; }   // 場所が変わったら位置を取り直す
+        const row = {"名前":name, "GoogleマップURL":url, ...extra, "更新した人":me, "更新日時":nowStr()};
+        if (url !== o.url || fd.addr !== o.addr || name !== o.name){ row["緯度"] = ""; row["経度"] = ""; }   // 場所が変わったら位置を取り直す
         return api({sheet:"スポット", action:"update", id:o.id, row}).then(() => toast("直しました"));
       }
-      if (!fd.paste) return warn("リンクを貼るか、名前を打ってね");
-      const {url, name} = splitPaste(fd.paste);
-      const dup = name && spots.find(x => x.name.replace(/【.*?】/g, "") === name);
+      const dup = spots.find(x => x.name.replace(/【.*?】/g, "") === name);
       if (dup && !confirm(`「${dup.name}」はもう登録されています。それでも追加しますか？`)) return false;
       return api({sheet:"スポット", action:"append", row:{"区分":"スポット", "名前":name, "GoogleマップURL":url, ...extra, "追加した人":me}})
         .then(() => { sortBy = "new"; typeF = "all"; render(); toast("追加しました！"); });
     }, o ? "直す" : "追加");
+  // 名前の欄にリンクを貼ったら、自動でリンクの欄へ移す
+  $("#fName").addEventListener("input", () => {
+    const sp = splitPaste($("#fName").value);
+    if (sp.url){ $("#fUrl").value = sp.url; $("#fName").value = sp.name; }
+  });
   if (!o){
-    const upd = () => $("#gsearch").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(($("#paste").value.trim() || "観光 飯") + " " + area);
-    $("#paste").oninput = upd; upd();
+    const upd = () => $("#gsearch").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(($("#fName").value.trim() || "観光 飯") + " " + area);
+    $("#fName").addEventListener("input", upd); upd();
   }
 }
 function cmtDialog(id){
