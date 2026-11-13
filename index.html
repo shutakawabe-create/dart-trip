@@ -7,21 +7,28 @@
 <title>ダーツの旅 スポット帳</title>
 <style>
 :root{
-  --bg:#f6f1e7; --card:#fffdf8; --ink:#2a2420; --sub:#6d635a; --line:#e3d9c8;
-  --accent:#c8442f; --accent-ink:#fff; --chip:#efe6d6; --ok:#2f7d5b; --okbg:#e3f2ea; --want:#b0571f; --wantbg:#fbeadd;
-  --c-kanko:#2f7d5b; --c-meshi:#c8442f; --c-leisure:#2f6fa8; --c-etc:#6d635a;
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1c2233; --sub:#687083; --line:#e4e8f0;
+  --accent:#ff5a3c; --accent-ink:#fff; --chip:#eef1f7; --ok:#0f9f74; --okbg:#e2f6ef; --want:#ee6a12; --wantbg:#fff0e4;
+  --c-kanko:#0fa37f; --c-meshi:#ff6b35; --c-leisure:#3b82f6; --c-etc:#8b5cf6;
+  --b-kanko:#e1f5ef; --b-meshi:#fff0e8; --b-leisure:#e6efff; --b-etc:#f0eaff;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.07);
+  --grad:linear-gradient(135deg,#7c3aed 0%,#ec4899 55%,#f97316 100%);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
-    --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329; --want:#eb9a62; --wantbg:#3a2a1e;
-    --c-kanko:#4fb489; --c-meshi:#e2664f; --c-leisure:#5a9ad6; --c-etc:#9a8f82;
+    --bg:#0f1320; --card:#191f30; --ink:#eef1f8; --sub:#9aa3b5; --line:#2a3247;
+    --accent:#ff6f52; --accent-ink:#fff; --chip:#222a3e; --ok:#34d399; --okbg:#0f3229; --want:#fb923c; --wantbg:#3a2414;
+    --c-kanko:#2dd4a7; --c-meshi:#ff8a5c; --c-leisure:#60a5fa; --c-etc:#a78bfa;
+    --b-kanko:#0f3a31; --b-meshi:#41210f; --b-leisure:#132a4c; --b-etc:#2a2050;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
-  --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329; --want:#eb9a62; --wantbg:#3a2a1e;
-  --c-kanko:#4fb489; --c-meshi:#e2664f; --c-leisure:#5a9ad6; --c-etc:#9a8f82;
+  --bg:#0f1320; --card:#191f30; --ink:#eef1f8; --sub:#9aa3b5; --line:#2a3247;
+  --accent:#ff6f52; --accent-ink:#fff; --chip:#222a3e; --ok:#34d399; --okbg:#0f3229; --want:#fb923c; --wantbg:#3a2414;
+  --c-kanko:#2dd4a7; --c-meshi:#ff8a5c; --c-leisure:#60a5fa; --c-etc:#a78bfa;
+  --b-kanko:#0f3a31; --b-meshi:#41210f; --b-leisure:#132a4c; --b-etc:#2a2050;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -125,6 +132,33 @@ details.opt summary{margin-top:14px}
 .hint{font-size:12px;color:var(--sub);margin-top:4px}
 .warn{color:var(--accent);font-size:14px;margin-top:8px}
 .toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;z-index:100;max-width:calc(100vw - 32px)}
+/* ---- 見た目の調整（色・押しやすさ・アイコン） ---- */
+h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.dest{background:var(--grad);box-shadow:0 10px 28px rgba(236,72,153,.28)}
+.card{border:0;box-shadow:var(--shadow);border-radius:16px;padding:12px 14px}
+.card.open{border:0;box-shadow:0 0 0 2px var(--accent),var(--shadow)}
+.card .top{gap:12px;align-items:flex-start}
+.ico{flex:none;width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.card h3{font-size:16px}
+.tagline{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:2px}
+.tag{margin:0;font-size:11px;padding:1px 7px;border-radius:999px;vertical-align:0}
+.route{font-size:11px;font-weight:700;color:var(--accent);background:var(--wantbg);border-radius:999px;padding:1px 7px}
+.reacts{gap:8px;margin-top:10px}
+.rb{min-height:40px;padding:8px 6px;font-size:14px;border-radius:12px;background:var(--chip);border-color:transparent;color:var(--ink);flex:1 1 0;min-width:0;white-space:nowrap;transition:transform .12s}
+.rb:active{transform:scale(.94)}
+.rb.on{animation:pop .32s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+.bar{flex-wrap:nowrap;margin:16px 0 4px}
+.chips{flex:1;min-width:0;padding:2px 0}
+.chip{padding:8px 14px;font-size:14px;border-color:transparent;background:var(--card);box-shadow:var(--shadow)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.sortbtn{flex:none;border:0;background:none;color:var(--sub);font-family:inherit;font-size:12px;padding:8px 2px;cursor:pointer;white-space:nowrap}
+.group{font-weight:700;letter-spacing:.04em}
+.fab{background:var(--grad);border:0;box-shadow:0 8px 22px rgba(236,72,153,.4);padding:14px 20px;font-size:16px}
+.box{border-color:transparent;box-shadow:var(--shadow)}
+.err{border-color:#f3b8ab}
+.logbox summary{font-size:15px;color:var(--ink);font-weight:700}
+.log{border-left-color:var(--ok)}
 </style>
 </head>
 <body>
@@ -137,24 +171,16 @@ details.opt summary{margin-top:14px}
   <div id="msg"></div>
   <div id="dest"><div class="box dest wait"><div class="lbl">🎯 今日の目的地</div><h2>読み込み中…</h2></div></div>
 
-  <div class="tabs" role="tablist">
-    <button class="tab" role="tab" data-tab="list" aria-selected="true">スポット</button>
-    <button class="tab" role="tab" data-tab="log" aria-selected="false">行った記録</button>
-  </div>
-
   <section id="p-list">
     <div class="bar">
       <div class="chips" id="chips"></div>
-      <div class="sort" id="sort">
-        <button data-sort="new" aria-pressed="true">新しい順</button>
-        <button data-sort="near" aria-pressed="false">目的地から近い順</button>
-      </div>
+      <button class="sortbtn" id="sort" data-sort="toggle">⇅ 新しい順</button>
     </div>
     <div id="list"><div class="empty">読み込み中…<br><span class="note">はじめて開いたときは数秒かかります</span></div></div>
   </section>
-  <section id="p-log" hidden><div id="log"></div></section>
 
   <div class="foot">
+    <details class="box logbox"><summary>✅ 行った記録（<span id="logCount">0</span>）</summary><div id="log"></div></details>
     <div class="box me-row"><span id="meLabel" class="note"></span><button class="btn small" id="changeName">名前を変える</button></div>
     <details class="box trash" id="trashBox" hidden>
       <summary>🗑 削除したスポット（<span id="trashCount">0</span>）</summary>
@@ -175,10 +201,10 @@ const AI_NAME = "Claude";
 const DEMO = !SCRIPT_URL || /[?&]demo/.test(location.search);
 
 const TYPES = [
-  {key:"観光", color:"--c-kanko"},
-  {key:"飯", color:"--c-meshi"},
-  {key:"レジャー", color:"--c-leisure"},
-  {key:"その他", color:"--c-etc"},
+  {key:"観光", color:"--c-kanko", bg:"--b-kanko", icon:"🏯"},
+  {key:"飯", color:"--c-meshi", bg:"--b-meshi", icon:"🍜"},
+  {key:"レジャー", color:"--c-leisure", bg:"--b-leisure", icon:"🎡"},
+  {key:"その他", color:"--c-etc", bg:"--b-etc", icon:"📍"},
 ];
 const $ = s => document.querySelector(s);
 const cssVar = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -205,7 +231,7 @@ const DEMO_SEED = () => { const t = nowStr().slice(0, 10); return {
     {"ID":"d01","日時":t+" 08:52","区分":"ダーツ","名前":"【お試し】埼玉県 秩父市","住所":"埼玉県秩父市","緯度":"35.9917","経度":"139.0856"},
     {"ID":"s01","日時":t+" 09:20","区分":"スポット","名前":"【お試し】秩父神社","種類":"観光","住所":"埼玉県秩父市番場町1-3","緯度":"35.9975","経度":"139.0839","ひとこと":"秩父の総社。境内の彫刻が見どころ","値段":"無料","営業時間":"終日","駐車場":"あり","追加した人":AI_NAME},
     {"ID":"s02","日時":t+" 09:21","区分":"スポット","名前":"【お試し】わらじかつ亭","種類":"飯","住所":"埼玉県秩父市番場町1-21","緯度":"35.9969","経度":"139.0851","ひとこと":"秩父名物わらじかつ丼","値段":"1,000〜1,500円","営業時間":"11:00〜15:00頃","追加した人":AI_NAME},
-    {"ID":"s03","日時":t+" 09:22","区分":"スポット","名前":"【お試し】秩父ミューズパーク","種類":"レジャー","住所":"埼玉県秩父市久那637-2","緯度":"35.9718","経度":"139.0697","ひとこと":"広い公園。展望台やアスレチック","追加した人":AI_NAME},
+    {"ID":"s03","日時":t+" 09:22","区分":"スポット","名前":"【お試し】秩父ミューズパーク","種類":"レジャー","住所":"埼玉県秩父市久那637-2","緯度":"35.9718","経度":"139.0697","ひとこと":"広い公園。展望台やアスレチック","追加した人":AI_NAME,"エリア":"道中"},
     {"ID":"s04","日時":t+" 10:05","区分":"スポット","名前":"【お試し】羊山公園","種類":"観光","住所":"埼玉県秩父市大宮6267","緯度":"35.9844","経度":"139.0927","ひとこと":"街を見下ろす公園","追加した人":"たくや"}],
   "コメント":[
     {"ID":"k01","日時":t+" 10:30","スポットID":"s02","名前":"はな","行きたい":"はい"},
@@ -317,7 +343,7 @@ function ingest(d){
   const all = (d["スポット"] || []).map((o, i) => ({
     id:o["ID"] || "r" + i, idx:i, ts:parseTs(o["日時"]), kind:o["区分"] || "スポット",
     name:String(o["名前"] || "").trim(), type:o["種類"] || "", addr:o["住所"] || "", url:o["GoogleマップURL"] || "",
-    desc:o["ひとこと"] || "", price:o["値段"] || "", hours:o["営業時間"] || "", parking:o["駐車場"] || "",
+    desc:o["ひとこと"] || "", route:/道中/.test(o["エリア"] || ""), price:o["値段"] || "", hours:o["営業時間"] || "", parking:o["駐車場"] || "",
     by:String(o["追加した人"] || "").trim(), upBy:String(o["更新した人"] || "").trim(), upTs:parseTs(o["更新日時"]),
     ll:(num(o["緯度"]) != null && num(o["経度"]) != null) ? [num(o["緯度"]), num(o["経度"])] : null,
     hidden:off(o["表示"]), delBy:o["削除した人"] || "", delAt:o["削除日時"] || "",
@@ -344,7 +370,10 @@ function km(a, b){
 }
 const typeColor = t => `var(${(TYPES.find(T => T.key === t) || TYPES[3]).color})`;   // ダークモードの切り替えにも追従
 // 貼られたリンクがあればそれをそのまま開く（貼った人が見ていた店が出る）。なければ名前（＋住所）で検索
-const gmapUrl = o => isUrl(o.url) ? o.url : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.addr ? o.name + " " + o.addr : o.name);
+// 貼られたリンクがあればそのまま。位置があれば「その場所の周辺で店名を探す」（同名の別の店が出にくい）
+const gmapUrl = o => isUrl(o.url) ? o.url
+  : (o.ll && o.name && !/^（/.test(o.name)) ? `https://www.google.com/maps/search/${encodeURIComponent(o.name)}/@${o.ll[0]},${o.ll[1]},17z`
+  : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.addr ? o.name + " " + o.addr : o.name);
 const embedUrl = (o, z) => "https://www.google.com/maps?hl=ja&output=embed&z=" + z + "&q=" + encodeURIComponent(o.ll ? o.ll.join(",") : [o.name, o.addr].filter(Boolean).join(" "));
 const hhmm = ts => ts ? new Date(ts).toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}) : "";
 const nm = n => n || "だれか";
@@ -382,20 +411,22 @@ function renderChips(){
   const counts = {}; spots.forEach(o => counts[o.type] = (counts[o.type] || 0) + 1);
   const chip = (k, l) => `<button class="chip" data-type="${esc(k)}" aria-pressed="${typeF === k}">${l}</button>`;
   $("#chips").innerHTML = chip("all", "すべて") + TYPES.map(T => chip(T.key, T.key)).join("");
-  document.querySelectorAll("#sort button").forEach(b => b.setAttribute("aria-pressed", b.dataset.sort === sortBy));
-  $("#sort").hidden = !(dest && dest.ll);
   if (!(dest && dest.ll)) sortBy = "new";
+  $("#sort").hidden = !(dest && dest.ll);
+  $("#sort").textContent = sortBy === "near" ? "⇅ 目的地から近い順" : "⇅ 新しい順";
 }
 
 function card(o){
   const open = openId === o.id;
   const want = reactors(o.id, "want"), went = reactors(o.id, "went"), texts = cmtsOf(o.id).filter(c => c.text);
   const myWant = mineOf(o.id, "want").length, myWent = mineOf(o.id, "went").length;
-  const who = [o.by ? `${esc(o.by)}が追加` : "", isHuman(o.upBy) ? `${esc(o.upBy)}が更新` : ""].filter(Boolean).join("・");
+  const who = [isHuman(o.by) ? `${esc(o.by)}が追加` : "", isHuman(o.upBy) ? `${esc(o.upBy)}が更新` : ""].filter(Boolean).join("・");
+  const T = TYPES.find(x => x.key === o.type) || TYPES[3];
   const info = [["駐車場", o.parking], ["値段", o.price], ["営業時間", o.hours], ["住所", o.addr]].filter(x => x[1]);
   return `<article class="card ${open ? "open" : ""}" data-card="${esc(o.id)}" id="c-${esc(o.id)}">
-    <div class="top"><div class="t">
-      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)}</h3>
+    <div class="top"><div class="ico" style="background:var(${T.bg})" aria-hidden="true">${T.icon}</div><div class="t">
+      <div class="tagline"><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${o.route ? `<span class="route">🚗 道中</span>` : ""}</div>
+      <h3>${esc(o.name)}</h3>
       ${o.desc ? `<div class="desc">${esc(o.desc)}</div>` : ""}
       ${!open && texts.length ? `<div class="peek">${texts.slice(-2).map(c => `<div class="cmt">💬 <b>${esc(nm(c.name))}</b>：${esc(c.text)}</div>`).join("")}${texts.length > 2 ? `<div class="note">ほか${texts.length - 2}件</div>` : ""}</div>` : ""}
       ${who ? `<div class="who">${who}</div>` : ""}
@@ -451,6 +482,7 @@ function renderLog(){
     ✅ <b>${esc(byId[c.spot].name)}</b> <span class="note">${esc(nm(c.name))}</span></div>`}));
   if (dest) items.push({ts:dest.ts, html:`<div class="log" style="border-color:#6a1fc2"><span class="t">${esc(hhmm(dest.ts))}</span><br>🎯 <b>目的地決定：${esc(dest.name)}</b></div>`});
   items.sort((a, b) => b.ts - a.ts);
+  $("#logCount").textContent = comments.filter(c => c.went && byId[c.spot]).length;
   $("#log").innerHTML = items.length ? items.map(x => x.html).join("") : `<div class="empty">まだ記録がありません。<br>行った場所で「✅ 行った」を押すとここに残ります。</div>`;
 }
 function renderFoot(){
@@ -582,16 +614,10 @@ async function setRow(sheet, id, row, done){
 
 /* ---------- 操作 ---------- */
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-tab],[data-type],[data-sort],[data-act],[data-card]");
+  const t = e.target.closest("[data-type],[data-sort],[data-act],[data-card]");
   if (!t) return;
-  if (t.dataset.tab){
-    tab = t.dataset.tab;
-    document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b === t));
-    $("#p-list").hidden = tab !== "list"; $("#p-log").hidden = tab !== "log";
-    return;
-  }
   if (t.dataset.type){ typeF = t.dataset.type; renderChips(); renderList(); return; }
-  if (t.dataset.sort){ sortBy = t.dataset.sort; renderChips(); renderList(); return; }
+  if (t.dataset.sort){ sortBy = sortBy === "near" ? "new" : "near"; renderChips(); renderList(); return; }
   if (t.dataset.card){ if (e.target.closest("a,button,.more")) return; openId = openId === t.dataset.card ? null : t.dataset.card; renderList(); return; }
   const id = t.dataset.id, act = t.dataset.act, o = spots.find(x => x.id === id);
   if (act === "want" || act === "went"){ if (needName()) toggle(id, act); }
