@@ -146,7 +146,7 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 .reacts{gap:8px;margin-top:10px}
 .rb{min-height:40px;padding:8px 6px;font-size:14px;border-radius:12px;background:var(--chip);border-color:transparent;color:var(--ink);flex:1 1 0;min-width:0;white-space:nowrap;transition:transform .12s}
 .rb:active{transform:scale(.94)}
-.rb.on{animation:pop .32s ease}
+.rb.popnow{animation:pop .32s ease}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
 .bar{flex-wrap:nowrap;margin:16px 0 4px}
 .chips{flex:1;min-width:0;padding:2px 0}
@@ -472,7 +472,7 @@ function renderList(keep){
     return;
   }
   $("#list").innerHTML =
-    (humans.length ? `<div class="group">みんなが追加・反応</div><div class="cards">${humans.map(card).join("")}</div>` : "") +
+    (humans.length ? `<div class="cards" style="margin-top:12px">${humans.map(card).join("")}</div>` : "") +
     (ai.length ? `<div class="group">Claudeが調べた候補</div><div class="cards">${ai.map(card).join("")}</div>` : "");
 }
 
@@ -620,7 +620,12 @@ document.addEventListener("click", e => {
   if (t.dataset.sort){ sortBy = sortBy === "near" ? "new" : "near"; renderChips(); renderList(); return; }
   if (t.dataset.card){ if (e.target.closest("a,button,.more")) return; openId = openId === t.dataset.card ? null : t.dataset.card; renderList(); return; }
   const id = t.dataset.id, act = t.dataset.act, o = spots.find(x => x.id === id);
-  if (act === "want" || act === "went"){ if (needName()) toggle(id, act); }
+  if (act === "want" || act === "went"){
+    if (!needName()) return;
+    toggle(id, act);
+    // 押したボタンだけを弾ませる（画面は描き直されるので、描き直した後のボタンに付ける）
+    requestAnimationFrame(() => { const nb = document.querySelector(`.card[data-card="${CSS.escape(id)}"] [data-act="${act}"]`); if (nb) nb.classList.add("popnow"); });
+  }
   else if (act === "cmt"){ if (needName()) cmtDialog(id); }
   else if (act === "focus"){ focusId = id; renderDest(); window.scrollTo({top:0, behavior:"smooth"}); }
   else if (act === "unfocus"){ focusId = null; renderDest(); }
