@@ -78,7 +78,10 @@ h1 span{color:var(--accent)}
 .card.focus{outline:2px solid var(--accent)}
 .card h3{font-size:16px;margin:0 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .tag{font-size:12px;font-weight:600;color:#fff;border-radius:6px;padding:1px 7px;flex:none}
-.edit{margin-left:auto;border:0;background:none;color:var(--sub);font-size:13px;cursor:pointer;padding:2px 4px;font-family:inherit}
+.names{display:flex;flex-wrap:wrap;gap:6px}
+.names input{position:absolute;opacity:0;pointer-events:none}
+.names label{margin:0;color:var(--ink);font-size:14px;border:1px solid var(--line);background:var(--chip);border-radius:10px;padding:6px 10px;cursor:pointer}
+.names input:checked+label{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .badges{display:flex;gap:6px;flex-wrap:wrap;margin:3px 0}
 .badge{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--sub)}
 .badge.ok{color:var(--ok);border-color:var(--ok);background:var(--okbg);font-weight:600}
@@ -162,6 +165,7 @@ details.help summary{cursor:pointer;color:var(--sub);font-size:13px}
     <p class="note">
     ・行った場所や気になる場所は「✍️ 行った・ひとこと」を押して、当てはまるものを選ぶだけ。ひとことや名前は書かなくても送れます。<br>
     ・見つけた観光地やお店は、右下の「＋ スポット追加」から。名前だけでも登録できます。<br>
+    ・間違えて登録したものは幹事に言ってください。<br>
     ・ページは1分ごとに自動で最新になります。</p>
   </details>
 </div>
@@ -197,6 +201,7 @@ let tab = "list", typeF = "all", nearMe = false, me = null;
 let map, layer, meMarker, fitted = false;
 const markers = {}, openMaps = new Set();
 let myName = store.get("myName", "");
+const MEMBERS = ["きな","心乃","たくや","ららばい","ちーちゃん","はやと","英雄","はな","ひろひと","クン=バル","ビショ太","やすゆき","きらり","[O,7in7in_321 ]","おちんちんセックス太郎","和","ほだか"];
 
 /* ---------- お試しモード（この端末の中だけに保存） ---------- */
 const DEMO_SEED = {
@@ -361,12 +366,12 @@ function renderList(){
     const lines = cs.filter(c => c.text || c.went || c.want).map(c =>
       `<div class="cmt">${c.went ? "✅" : c.want ? "🙋" : "💬"} <b>${esc(nameOf(c))}</b>${c.text ? "：" + esc(c.text) : c.went ? " 行った" : " 行きたい"}</div>`);
     return `<article class="card" id="c-${esc(o.id)}">
-      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)}
-        <button class="edit" data-act="edit" data-id="${esc(o.id)}">✏️ 直す</button></h3>
+      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)}</h3>
       ${badges ? `<div class="badges">${badges}</div>` : ""}
       ${dist ? `<div>${dist}</div>` : ""}
       ${o.desc ? `<div class="desc">${esc(o.desc)}</div>` : ""}
       ${info.length ? `<dl>${info.map(([k, x]) => `<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>` : ""}
+      ${o.by ? `<div class="by">追加：${esc(o.by)}</div>` : ""}
       ${lines.length ? `<div class="cmts">${lines.join("")}</div>` : ""}
       <div class="acts">
         <button class="btn small primary" data-act="react" data-id="${esc(o.id)}">✍️ 行った・ひとこと</button>
@@ -431,18 +436,26 @@ function renderMap(){
 /* ---------- 入力画面 ---------- */
 const seg = (name, opts, sel) => `<div class="seg">${opts.map((o, i) =>
   `<input type="radio" id="${name}${i}" name="${name}" value="${esc(o)}" ${o === sel ? "checked" : ""}><label for="${name}${i}">${esc(o)}</label>`).join("")}</div>`;
-const nameField = () => `<label>あなたの名前（なくてもOK）</label>
-  <input type="text" name="who" maxlength="20" value="${esc(myName)}" placeholder="例：たろう">`;
+// 名前は参加者の一覧から選ぶ（一度選べば記憶）
+const nameField = () => {
+  const other = myName && !MEMBERS.includes(myName);
+  return `<label>あなたは？（選ばなくてもOK）</label><div class="names">${
+    [...MEMBERS, "その他"].map((n, i) => `<input type="radio" id="who${i}" name="who" value="${esc(n)}"
+      ${(n === myName || (n === "その他" && other)) ? "checked" : ""}><label for="who${i}">${esc(n)}</label>`).join("")}</div>
+    <input type="text" name="whoOther" id="whoOther" maxlength="20" value="${other ? esc(myName) : ""}" placeholder="名前を入れてね" style="margin-top:6px" ${other ? "" : "hidden"}>`;
+};
 
 function openDialog(html, onSubmit, okLabel = "送る"){
   const f = $("#dlgForm");
   f.innerHTML = html + `<div class="dlg-acts"><button type="button" class="btn" id="dlgCancel">やめる</button>
     <button class="btn primary" id="dlgOk">${okLabel}</button></div>`;
   $("#dlgCancel").onclick = () => $("#dlg").close();
+  f.querySelectorAll('input[name="who"]').forEach(r => r.onchange = () => { const o = $("#whoOther"); if (o){ o.hidden = r.value !== "その他"; if (!o.hidden) o.focus(); } });
   f.onsubmit = async e => {
     e.preventDefault();
     const fd = Object.fromEntries(new FormData(f));
     for (const k in fd) fd[k] = String(fd[k]).trim();
+    if (fd.who === "その他") fd.who = fd.whoOther || "";
     if ("who" in fd){ myName = fd.who; store.set("myName", myName); }
     const ok = $("#dlgOk"); ok.disabled = true; ok.textContent = "送信中…";
     try{
@@ -480,37 +493,26 @@ function react(id){
 }
 
 const norm = t => (t || "").replace(/【.*?】|\s/g, "").toLowerCase();
-function spotDialog(o){
-  const v = o || {};
-  const place = v.url && !v.addr ? v.url : v.addr || v.url || "";
-  openDialog(`<h2>${o ? "✏️ スポットを直す" : "＋ スポット追加"}</h2>
+function spotDialog(){
+  openDialog(`<h2>＋ スポット追加</h2>
     <div class="hint">名前だけでも登録できます</div>
-    <label>名前</label><input type="text" name="spot" required maxlength="60" value="${esc(v.name)}" placeholder="例：〇〇食堂、△△城跡">
-    <label>種類</label>${seg("type", TYPES.map(T => T.key), v.type)}
-    <label>場所（住所かGoogleマップのリンク）</label><input type="text" name="place" value="${esc(place)}" placeholder="貼り付けるだけでOK">
-    <label>ひとこと</label><textarea name="desc" placeholder="名物、おすすめポイントなど">${esc(v.desc)}</textarea>
-    <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], v.parking)}
-    <details class="more" ${v.price || v.hours ? "open" : ""}><summary>値段・営業時間も書く</summary>
-      <div class="two"><div><label>値段の目安</label><input type="text" name="price" value="${esc(v.price)}" placeholder="例：1,000円くらい"></div>
-      <div><label>営業時間</label><input type="text" name="hours" value="${esc(v.hours)}" placeholder="例：11〜20時"></div></div></details>
-    ${o ? `<div class="acts" style="margin-top:14px"><button type="button" class="btn small" id="delSpot" style="color:var(--accent)">🗑 このスポットを消す</button></div>` : nameField()}`,
+    <label>名前</label><input type="text" name="spot" required maxlength="60" placeholder="例：〇〇食堂、△△城跡">
+    <label>種類</label>${seg("type", TYPES.map(T => T.key), "")}
+    <label>場所（住所かGoogleマップのリンク）</label><input type="text" name="place" placeholder="貼り付けるだけでOK">
+    <label>ひとこと</label><textarea name="desc" placeholder="名物、おすすめポイントなど"></textarea>
+    <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], "")}
+    <details class="more"><summary>値段・営業時間も書く</summary>
+      <div class="two"><div><label>値段の目安</label><input type="text" name="price" placeholder="例：1,000円くらい"></div>
+      <div><label>営業時間</label><input type="text" name="hours" placeholder="例：11〜20時"></div></div></details>
+    ${nameField()}`,
     fd => {
+      const dup = spots.find(x => norm(x.name) === norm(fd.spot));
+      if (dup && !confirm(`「${dup.name}」はもう登録されています。それでも追加しますか？\n（感想なら、そのスポットの「✍️ 行った・ひとこと」から書けます）`)) return false;
       const url = isUrl(fd.place) ? fd.place : "", addr = isUrl(fd.place) ? "" : fd.place;
-      const row = {"名前":fd.spot, "種類":fd.type || "その他", "住所":addr, "GoogleマップURL":url,
-        "ひとこと":fd.desc, "値段":fd.price || "", "営業時間":fd.hours || "", "駐車場":fd.parking || ""};
-      if (!o){
-        const dup = spots.find(x => norm(x.name) === norm(fd.spot));
-        if (dup && !confirm(`「${dup.name}」はもう登録されています。それでも追加しますか？`)) return false;
-        return api({sheet:"スポット", action:"append", row:{"区分":"スポット", ...row, "追加した人":fd.who}}).then(() => toast("追加しました！"));
-      }
-      if (addr !== o.addr || url !== o.url){ row["緯度"] = ""; row["経度"] = ""; }   // 場所が変わったら位置を取り直す
-      return api({sheet:"スポット", action:"update", id:o.id, row}).then(() => toast("直しました"));
-    }, o ? "直す" : "追加");
-  if (o) $("#delSpot").onclick = async () => {
-    if (!confirm(`「${o.name}」を消しますか？`)) return;
-    try{ await api({sheet:"スポット", action:"update", id:o.id, row:{"表示":"非表示"}}); $("#dlg").close(); toast("消しました"); load(); }
-    catch(e){ alert("消せませんでした"); }
-  };
+      return api({sheet:"スポット", action:"append", row:{"区分":"スポット", "名前":fd.spot, "種類":fd.type || "その他",
+        "住所":addr, "GoogleマップURL":url, "ひとこと":fd.desc, "値段":fd.price || "", "営業時間":fd.hours || "",
+        "駐車場":fd.parking || "", "追加した人":fd.who}}).then(() => toast("追加しました！"));
+    }, "追加");
 }
 
 /* ---------- 操作 ---------- */
@@ -532,7 +534,6 @@ document.addEventListener("click", e => {
   }
   const id = t.dataset.id, act = t.dataset.act;
   if (act === "react") react(id);
-  else if (act === "edit"){ const o = spots.find(x => x.id === id); o && spotDialog(o); }
   else if (act === "gmap"){ openMaps.has(id) ? openMaps.delete(id) : openMaps.add(id); renderList(); }
   else if (act === "goto"){
     $('[data-tab="list"]').click();
@@ -546,7 +547,7 @@ function locateMe(done){
   navigator.geolocation.getCurrentPosition(p => { me = [p.coords.latitude, p.coords.longitude]; done(); },
     () => alert("現在地がわかりませんでした（位置情報の許可を確認してください）"), {enableHighAccuracy:true, timeout:10000});
 }
-$("#addBtn").onclick = () => spotDialog(null);
+$("#addBtn").onclick = () => spotDialog();
 $("#reload").onclick = load;
 
 load();
