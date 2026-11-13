@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
 <title>ダーツの旅 スポット帳</title>
 <style>
 :root{
@@ -46,7 +47,7 @@ h1 span{color:var(--accent)}
 .dest h2{margin:2px 0 4px;font-size:28px;line-height:1.25;letter-spacing:.02em}
 .dest .sub2{opacity:.9;font-size:14px}
 .dest .btn{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.45);color:#fff}
-.dest iframe{display:block;width:100%;height:250px;border:0;background:#ddd}
+.dest iframe{display:block;width:100%;height:200px;border:0;background:#ddd}
 .dest .focusbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,0,0,.25);font-size:14px}
 .dest .focusbar b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dest.wait{text-align:center;padding:22px 16px}
@@ -243,16 +244,22 @@ function applyLocal(body, serverRow, tmp){
   if (!DEMO) store.set("cache", raw);
   ingest(raw); render(body.sheet === "コメント" || body.action === "update");
 }
+// 電波が弱くても止まり続けないよう、15秒で打ち切る
+async function fetchT(url, opt = {}){
+  const ac = new AbortController(), t = setTimeout(() => ac.abort(), 15000);
+  try{ return await fetch(url, {...opt, signal:ac.signal}); } finally{ clearTimeout(t); }
+}
 async function api(body){
   if (DEMO){ const r = demoApi(body); raw = demoDB(); ingest(raw); render(body.sheet === "コメント" || body.action === "update"); return r; }
   pending++;
   // 削除・復活・行きたい・行った・コメントは、押した瞬間に画面へ出す（スポット追加だけは位置が入るのを待つ）
   const quick = body.action === "update" || body.sheet === "コメント";
+  const before = raw ? JSON.parse(JSON.stringify(raw)) : null;   // 失敗したらこの状態に戻す
   const tmp = body.action === "append" && quick ? {...body.row, "ID":"tmp" + Date.now() + Math.random(), "日時":nowStr()} : null;
   if (quick) applyLocal(body, null, tmp);
   let ok = false;
   try{
-    const r = await fetch(SCRIPT_URL, {method:"POST", body:JSON.stringify(body)});
+    const r = await fetchT(SCRIPT_URL, {method:"POST", body:JSON.stringify(body)});
     const j = await r.json();
     if (!j.ok) throw new Error(j.error || "失敗しました");
     ok = true;
@@ -260,7 +267,10 @@ async function api(body){
     return j;
   }finally{
     pending--;
-    if (!ok) load(true);
+    if (!ok){
+      if (before){ raw = before; store.set("cache", raw); ingest(raw); render(true); }   // 押す前の画面に戻す
+      load(true);
+    }
     else if (!pending) setTimeout(() => load(false, true), 1500);
   }
 }
@@ -277,10 +287,10 @@ async function load(force, keep){
   loading = true;
   $("#updated").textContent = "更新中…";
   try{
-    const r = await fetch(SCRIPT_URL + "?_=" + Date.now());
+    const r = await fetchT(SCRIPT_URL + "?_=" + Date.now());
     const j = await r.json();
     if (!j.ok) throw new Error(j.error);
-    if (pending && !force) return;
+    if (pending && !force){ stamp(); return; }
     raw = j.data; store.set("cache", raw);
     ingest(raw); msg(""); stamp(); render(keep);
   }catch(e){
@@ -321,7 +331,7 @@ function ingest(d){
   });
   dest = all.filter(o => o.kind === "ダーツ" && !o.hidden).sort((a, b) => b.ts - a.ts)[0] || null;
   spots = all.filter(o => o.kind !== "ダーツ" && !o.hidden);
-  trashed = all.filter(o => o.kind !== "ダーツ" && o.hidden).sort((a, b) => (b.delAt > a.delAt) - (b.delAt < a.delAt));
+  trashed = all.filter(o => o.kind !== "ダーツ" && o.hidden).sort((a, b) => parseTs(b.delAt) - parseTs(a.delAt));
   if (focusId && !spots.some(o => o.id === focusId)) focusId = null;
 }
 function msg(t){ $("#msg").innerHTML = t ? `<div class="box err">${esc(t)}</div>` : ""; }
@@ -332,7 +342,7 @@ function km(a, b){
   const h = Math.sin(d1/2)**2 + Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(d2/2)**2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
-const typeColor = t => cssVar((TYPES.find(T => T.key === t) || TYPES[3]).color);
+const typeColor = t => `var(${(TYPES.find(T => T.key === t) || TYPES[3]).color})`;   // ダークモードの切り替えにも追従
 // 貼られたリンクがあればそれをそのまま開く（貼った人が見ていた店が出る）。なければ名前（＋住所）で検索
 const gmapUrl = o => isUrl(o.url) ? o.url : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.addr ? o.name + " " + o.addr : o.name);
 const embedUrl = (o, z) => "https://www.google.com/maps?hl=ja&output=embed&z=" + z + "&q=" + encodeURIComponent(o.ll ? o.ll.join(",") : [o.name, o.addr].filter(Boolean).join(" "));
@@ -371,7 +381,7 @@ const focusBar = f => f ? `<div class="focusbar" id="focusbar"><b>📍 ${esc(f.n
 function renderChips(){
   const counts = {}; spots.forEach(o => counts[o.type] = (counts[o.type] || 0) + 1);
   const chip = (k, l) => `<button class="chip" data-type="${esc(k)}" aria-pressed="${typeF === k}">${l}</button>`;
-  $("#chips").innerHTML = chip("all", "すべて") + TYPES.filter(T => counts[T.key]).map(T => chip(T.key, T.key)).join("");
+  $("#chips").innerHTML = chip("all", "すべて") + TYPES.map(T => chip(T.key, T.key)).join("");
   document.querySelectorAll("#sort button").forEach(b => b.setAttribute("aria-pressed", b.dataset.sort === sortBy));
   $("#sort").hidden = !(dest && dest.ll);
   if (!(dest && dest.ll)) sortBy = "new";
@@ -431,7 +441,7 @@ function renderList(keep){
     return;
   }
   $("#list").innerHTML =
-    (humans.length ? `<div class="group">みんなが追加・更新</div><div class="cards">${humans.map(card).join("")}</div>` : "") +
+    (humans.length ? `<div class="group">みんなが追加・反応</div><div class="cards">${humans.map(card).join("")}</div>` : "") +
     (ai.length ? `<div class="group">Claudeが調べた候補</div><div class="cards">${ai.map(card).join("")}</div>` : "");
 }
 
@@ -490,7 +500,8 @@ const needName = () => { if (me) return true; askName(true); return false; };
 function splitPaste(s){
   const m = (s || "").match(/https?:\/\/\S+/);
   if (!m) return {url:"", name:s.trim()};
-  let name = s.replace(m[0], "").split(/[\n\r]+|\s[·・|]\s/)[0].trim();
+  // 「店名 ★4.2(120) 埼玉県…」のような共有文から店名だけを取り出す
+  let name = s.replace(m[0], "").split(/[\n\r]+|\s[·・|]\s|\s*★|\s*〒|\s+[\d.]+\s*\(\d+\)|\s+(?=(?:東京都|北海道|京都府|大阪府|\S{2,3}県))/)[0].trim();
   if (!name){ const p = m[0].match(/\/maps\/place\/([^/@?]+)/); if (p) name = decodeURIComponent(p[1].replace(/\+/g, " ")); }
   return {url:m[0], name};
 }
@@ -506,7 +517,7 @@ function spotDialog(o){
     <label>種類（なくてもOK）</label>${seg("type", TYPES.map(T => T.key), v.type && v.type !== "その他" ? v.type : (o ? "その他" : ""))}
     <label>説明（なくてもOK）</label><textarea name="desc" placeholder="名物、おすすめポイントなど">${esc(v.desc)}</textarea>
     <details class="opt" ${o && (v.parking || v.price || v.hours || v.addr) ? "open" : ""}><summary>詳しく（駐車場・値段・営業時間・住所）</summary>
-      <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], v.parking)}
+      <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない", ...(v.parking && !["あり", "なし", "わからない"].includes(v.parking) ? [v.parking] : [])], v.parking)}
       <div class="two"><div><label>値段の目安</label><input type="text" name="price" value="${esc(v.price)}" placeholder="例：1,000円くらい"></div>
       <div><label>営業時間</label><input type="text" name="hours" value="${esc(v.hours)}" placeholder="例：11〜20時"></div></div>
       <label>住所</label><input type="text" name="addr" value="${esc(v.addr)}"></details>`,
@@ -519,7 +530,8 @@ function spotDialog(o){
       const extra = {"種類":fd.type || "その他", "ひとこと":fd.desc, "駐車場":fd.parking || "", "値段":fd.price, "営業時間":fd.hours, "住所":fd.addr};
       if (o){
         const row = {"名前":name, "GoogleマップURL":url, ...extra, "更新した人":me, "更新日時":nowStr()};
-        if (url !== o.url || fd.addr !== o.addr || name !== o.name){ row["緯度"] = ""; row["経度"] = ""; }   // 場所が変わったら位置を取り直す
+        if (url !== o.url || fd.addr !== o.addr){ row["緯度"] = ""; row["経度"] = ""; }   // 場所が変わったら位置を取り直す
+        else if (o.ll){ row["緯度"] = String(o.ll[0]); row["経度"] = String(o.ll[1]); }   // 変えていなければ今の正確な位置を残す
         return api({sheet:"スポット", action:"update", id:o.id, row}).then(() => toast("直しました"));
       }
       const dup = spots.find(x => x.name.replace(/【.*?】/g, "") === name);
@@ -551,7 +563,8 @@ async function toggle(id, key){
   const k = id + key;
   if (busy.has(k)) return;
   busy.add(k);
-  const mine = mineOf(id, key);
+  const mine = mineOf(id, key).filter(c => !String(c.id).startsWith("tmp"));   // 送信中の仮の行は取り消しに使わない
+  if (!mine.length && mineOf(id, key).length) return;
   try{
     if (mine.length) await Promise.all(mine.map(c => api({sheet:"コメント", action:"update", id:c.id, row:{"表示":"非表示"}})));
     else{
