@@ -8,67 +8,104 @@
 <style>
 :root{
   --bg:#f6f1e7; --card:#fffdf8; --ink:#2a2420; --sub:#6d635a; --line:#e3d9c8;
-  --accent:#c8442f; --accent-ink:#fff; --chip:#efe6d6;
-  --c-kanko:#2f7d5b; --c-meshi:#c8442f; --c-onsen:#2f6fa8; --c-shugo:#8a4bb0; --c-car:#b07a12; --c-etc:#6d635a;
+  --accent:#c8442f; --accent-ink:#fff; --chip:#efe6d6; --ok:#2f7d5b; --okbg:#e3f2ea;
+  --c-kanko:#2f7d5b; --c-meshi:#c8442f; --c-onsen:#2f6fa8; --c-kai:#b07a12; --c-etc:#6d635a; --c-dart:#8a2be2;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
-    --accent:#e2664f; --accent-ink:#fff; --chip:#332d27;
-    --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-shugo:#b27ad6; --c-car:#d9a43a; --c-etc:#b3a898;
+    --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329;
+    --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-kai:#d9a43a; --c-etc:#9a8f82; --c-dart:#b47cf0;
   }
 }
 :root[data-theme="dark"]{
   --bg:#1b1815; --card:#25211d; --ink:#f1ebe2; --sub:#b3a898; --line:#3a332c;
-  --accent:#e2664f; --accent-ink:#fff; --chip:#332d27;
-  --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-shugo:#b27ad6; --c-car:#d9a43a; --c-etc:#b3a898;
+  --accent:#e2664f; --accent-ink:#fff; --chip:#332d27; --ok:#5cc495; --okbg:#1f3329;
+  --c-kanko:#4fb489; --c-meshi:#e2664f; --c-onsen:#5a9ad6; --c-kai:#d9a43a; --c-etc:#9a8f82; --c-dart:#b47cf0;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
 a{color:inherit}
-.wrap{max-width:720px;margin:0 auto;padding:0 16px 96px}
-header{padding:18px 0 10px}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 110px}
+header{padding:16px 0 6px}
 h1{font-size:22px;margin:0;letter-spacing:.02em}
 h1 span{color:var(--accent)}
-.meta{color:var(--sub);font-size:13px;margin-top:2px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:14px;text-decoration:none;cursor:pointer;font-family:inherit;white-space:nowrap}
+.meta{color:var(--sub);font-size:13px;margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:14px;text-decoration:none;cursor:pointer;font-family:inherit;white-space:nowrap;line-height:1.3}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
 .btn.small{padding:5px 10px;font-size:13px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn.on{background:var(--okbg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.note{color:var(--sub);font-size:13px}
 .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
-.box h2{font-size:14px;margin:0 0 8px;color:var(--sub);font-weight:600}
-.return{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.return b{font-size:18px}
-.cars{display:grid;gap:8px}
-.car{border-left:4px solid var(--c-car);padding:4px 0 4px 10px}
-.car .t{color:var(--sub);font-size:12px}
-.shugo{border-left-color:var(--c-shugo)}
-.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}
-.chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;font-family:inherit}
+.err{background:#fde8e4;color:#7a1f10;border-color:#f3b8ab}
+
+.dart{border:2px solid var(--c-dart);padding:0;overflow:hidden}
+.dart .in{padding:12px 14px}
+.dart .lbl{color:var(--c-dart);font-weight:700;font-size:13px}
+.dart h2{margin:2px 0 4px;font-size:20px}
+.dart iframe{display:block;width:100%;height:220px;border:0;border-top:1px solid var(--line)}
+.dart.empty{border-style:dashed;text-align:center;padding:18px 14px}
+.prev{font-size:13px;color:var(--sub);margin-top:6px}
+
+.tabs{display:flex;gap:4px;background:var(--chip);border-radius:12px;padding:4px;margin:14px 0 8px;position:sticky;top:0;z-index:500}
+.tab{flex:1;border:0;background:transparent;color:var(--ink);font-family:inherit;font-size:14px;padding:8px 4px;border-radius:9px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--card);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;font-family:inherit}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-#map{height:46vh;min-height:260px;border-radius:14px;border:1px solid var(--line);margin:8px 0;z-index:0}
-#map.hidden{display:none}
-.cards{display:grid;gap:10px;margin-top:6px}
+
+#map{height:62vh;min-height:300px;border-radius:14px;border:1px solid var(--line);z-index:0}
+.pin{width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
+.pin i{transform:rotate(45deg);font-style:normal;color:#fff;font-size:13px;font-weight:700}
+.pin.big{width:38px;height:38px}
+.pin.big i{font-size:18px}
+.me{width:16px;height:16px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,115,232,.35)}
+.leaflet-popup-content{font-size:14px;margin:10px 12px}
+
+.cards{display:grid;gap:10px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .card.focus{outline:2px solid var(--accent)}
-.card h3{font-size:16px;margin:0 0 2px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.card h3{font-size:16px;margin:0 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .tag{font-size:12px;font-weight:600;color:#fff;border-radius:6px;padding:1px 7px;flex:none}
-.card .desc{margin:4px 0}
-.card dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:6px 0;font-size:13px}
-.card dt{color:var(--sub)}
-.card dd{margin:0;overflow-wrap:anywhere}
-.card .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
-.card .by{color:var(--sub);font-size:12px}
+.badge{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--sub);flex:none}
+.badge.ok{color:var(--ok);border-color:var(--ok);background:var(--okbg);font-weight:600}
 .dist{color:var(--sub);font-size:13px;font-weight:400}
-.note{color:var(--sub);font-size:13px}
-.err{background:#fde8e4;color:#7a1f10;border-color:#f3b8ab}
+.desc{margin:4px 0}
+dl{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;margin:6px 0;font-size:13px}
+dt{color:var(--sub)} dd{margin:0;overflow-wrap:anywhere}
+.by{color:var(--sub);font-size:12px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.gmap{width:100%;height:200px;border:0;border-radius:10px;margin-top:8px;display:block}
+.cmts{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;display:grid;gap:4px}
+.cmt{font-size:14px}
+.cmt b{font-size:13px}
+.cmt .t{color:var(--sub);font-size:12px}
 .empty{text-align:center;color:var(--sub);padding:28px 0}
+
+.log{border-left:3px solid var(--ok);padding:2px 0 2px 10px;margin:8px 0}
+.log .t{color:var(--sub);font-size:12px}
+
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:1000;box-shadow:0 4px 14px rgba(0,0,0,.25);padding:12px 18px;font-size:15px}
-.pin{width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
-.me{width:16px;height:16px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,115,232,.35)}
-.leaflet-popup-content{font-size:14px}
+dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{padding:16px}
+dialog h2{margin:0 0 10px;font-size:18px}
+label{display:block;font-size:13px;color:var(--sub);margin:10px 0 3px}
+input[type=text],input[type=url],input[type=number],textarea,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+textarea{min-height:70px;resize:vertical}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{margin:0;color:var(--ink);font-size:14px;border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:6px 12px;cursor:pointer}
+.seg input:checked+label{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.check{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:15px;margin-top:12px}
+.check input{width:20px;height:20px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dlg-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.hint{font-size:12px;color:var(--sub);margin-top:2px}
+.toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;z-index:2000;max-width:calc(100vw - 32px)}
 details summary{cursor:pointer;color:var(--sub);font-size:13px}
 </style>
 </head>
@@ -84,291 +121,390 @@ details summary{cursor:pointer;color:var(--sub);font-size:13px}
   </header>
 
   <div id="msg"></div>
+  <div id="dart"></div>
 
-  <div class="box" id="carBox" hidden>
-    <h2>📍 集合・各車の状況</h2>
-    <div class="cars" id="cars"></div>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="list" aria-selected="true">スポット</button>
+    <button class="tab" role="tab" data-tab="map" aria-selected="false">地図</button>
+    <button class="tab" role="tab" data-tab="log" aria-selected="false">行った記録</button>
   </div>
 
-  <div class="chips" id="chips" role="toolbar" aria-label="種類で絞り込み"></div>
-  <div class="row">
-    <button class="btn small" id="sortBtn">並び：新しい順</button>
-    <button class="btn small" id="mapBtn">地図を隠す</button>
-  </div>
-  <div id="map"></div>
-  <div class="cards" id="list"></div>
+  <section id="p-list">
+    <div class="chips" id="typeChips"></div>
+    <div class="chips" id="subChips"></div>
+    <div class="cards" id="list"></div>
+  </section>
+  <section id="p-map" hidden>
+    <div class="chips" id="mapChips"></div>
+    <div id="map"></div>
+    <p class="note">ピンをタップすると名前が出ます。✓は誰かが行った場所です。</p>
+  </section>
+  <section id="p-log" hidden>
+    <div id="log"></div>
+  </section>
 
-  <details class="box" style="margin-top:20px">
-    <summary>使い方</summary>
-    <p class="note">・右下の「＋ 追加する」から、見つけたお店や観光地を送れます（ログイン不要）。<br>
-    ・場所には住所かGoogleマップのリンクを貼ってください。住所なら地図にピンが立ちます。<br>
-    ・車の現在地や行き先は、種類で「車の現在地・行き先」を選んで、「追加した人・車」に号車を書くと上に表示されます。<br>
-    ・ページは1分ごとに自動で最新の内容になります。</p>
+  <details class="box" style="margin-top:24px">
+    <summary>使い方・設定</summary>
+    <p class="note">
+    ・右下の「＋ スポット追加」から、見つけた観光地やお店を登録できます。住所かGoogleマップのリンクがあれば地図にピンが立ちます。<br>
+    ・各スポットの「💬 コメント」で「行きたい！」「しょぼかった」などを書けます。行ったら「✅ 行った」を押すと、行った記録に残ります。<br>
+    ・ダーツが刺さったら「🎯 着地点を登録」。<br>
+    ・名前と号車は一度入れるとこの端末に記憶されます。<br>
+    ・ページは1分ごとに自動で最新になります。間違えて登録したものは幹事に言ってください。</p>
+    <label for="carCount">車の台数（号車の選択肢になります）</label>
+    <div class="row"><input type="number" id="carCount" min="1" max="20" style="width:90px"><button class="btn small" id="saveCars">保存</button></div>
   </details>
 </div>
-<a class="btn primary fab" id="addBtn" target="_blank" rel="noopener" hidden>＋ 追加する</a>
+
+<button class="btn primary fab" id="addBtn">＋ スポット追加</button>
+<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
 /* ===== 設定 ===== */
-const SHEET_ID = "16sbgEbDFIKZPAaduDGUpj8yQIkxpd27yWyjFr2yTsCM";
-const SHEETS   = ["スポット", "フォームの回答 1"];   // 読み込むタブ名（無いタブは無視）
-const FORM_URL = "";                                  // Googleフォームの回答用URLを入れる
+const SCRIPT_URL = "";   // Apps Script の「ウェブアプリのURL」を入れる
 /* ================ */
 
 const TYPES = [
-  {key:"観光", label:"観光", color:"--c-kanko", match:/観光|景|寺|神社|公園|名所|見/},
-  {key:"飯",   label:"飯",   color:"--c-meshi", match:/飯|食|ご?はん|店|カフェ|ラーメン|グルメ|居酒屋/},
-  {key:"温泉", label:"温泉", color:"--c-onsen", match:/温泉|風呂|湯|銭湯|サウナ/},
-  {key:"集合", label:"集合場所", color:"--c-shugo", match:/集合/},
-  {key:"車",   label:"車",   color:"--c-car",   match:/車/},
-  {key:"他",   label:"その他", color:"--c-etc", match:/./},
+  {key:"観光", color:"--c-kanko"},
+  {key:"飯",   color:"--c-meshi"},
+  {key:"温泉", color:"--c-onsen"},
+  {key:"買い物・休憩", color:"--c-kai"},
+  {key:"その他", color:"--c-etc"},
 ];
-const FIELDS = {
-  time:/タイムスタンプ|日時|時刻/, name:/名前|店名|スポット/, type:/種類|ジャンル/,
-  place:/場所|住所/, lat:/緯度|lat/i, lng:/経度|lng|lon/i, desc:/ひとこと|コメント|メモ|説明/,
-  price:/値段|価格|予算/, hours:/営業/, group:/団体/, by:/追加|車|誰/, url:/URL|リンク/i,
-};
-
 const $ = s => document.querySelector(s);
 const cssVar = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const isUrl = s => /^https?:\/\//.test(s || "");
 const store = {
-  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
-  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  get(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
 };
 
-let rows = [], filter = "all", sortNear = false, me = null, map, layer, meMarker;
-const geoCache = store.get("geoCache") || {};
+let spots = [], darts = [], comments = [], settings = {};
+let tab = "list", typeF = "all", subF = "all", sortBy = "new", me = null;
+let map, layer, meMarker, fitted = false;
+const markers = {}, openMaps = new Set();
+const user = store.get("user", {name:"", car:""});
 
-/* CSV */
-function parseCSV(text){
-  const out = []; let row = [], cur = "", q = false;
-  for (let i = 0; i < text.length; i++){
-    const c = text[i];
-    if (q){
-      if (c === '"'){ if (text[i+1] === '"'){ cur += '"'; i++; } else q = false; }
-      else cur += c;
-    } else if (c === '"') q = true;
-    else if (c === ','){ row.push(cur); cur = ""; }
-    else if (c === '\n'){ row.push(cur); out.push(row); row = []; cur = ""; }
-    else if (c !== '\r') cur += c;
-  }
-  if (cur !== "" || row.length){ row.push(cur); out.push(row); }
-  return out;
+/* ---------- 通信 ---------- */
+async function api(body){
+  const r = await fetch(SCRIPT_URL, {method:"POST", body:JSON.stringify(body)});
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || "失敗しました");
+  return j;
 }
-
-function toObjects(table){
-  if (!table.length) return [];
-  const head = table[0];
-  const idx = {};
-  for (const [k, re] of Object.entries(FIELDS)){
-    const i = head.findIndex((h, j) => re.test(h) && !Object.values(idx).includes(j));
-    if (i >= 0) idx[k] = i;
-  }
-  return table.slice(1).map(r => {
-    const o = {};
-    for (const k in FIELDS) o[k] = idx[k] != null ? (r[idx[k]] || "").trim() : "";
-    return o;
-  }).filter(o => o.name || o.place);
-}
-
-function typeOf(t){ return TYPES.find(T => T.match.test(t || "")) || TYPES[TYPES.length-1]; }
-
-function coordsFrom(o){
-  const la = parseFloat(o.lat), ln = parseFloat(o.lng);
-  if (isFinite(la) && isFinite(ln)) return [la, ln];
-  const s = (o.place + " " + o.url);
-  const m = s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || s.match(/[?&](?:q|query|destination|ll)=(-?\d+\.\d+)(?:,|%2C)(-?\d+\.\d+)/) || s.match(/^\s*(-?\d{2}\.\d+)\s*[, ]\s*(-?\d{3}\.\d+)/);
-  if (m) return [parseFloat(m[1]), parseFloat(m[2])];
-  if (geoCache[o.place]) return geoCache[o.place];
-  return null;
-}
-
-async function geocodeMissing(){
-  const todo = [...new Set(rows.filter(o => !o.ll && o.place && !/^https?:/.test(o.place) && !(o.place in geoCache)).map(o => o.place))];
-  for (const p of todo){
-    try{
-      const r = await fetch("https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + encodeURIComponent(p));
-      const j = await r.json();
-      geoCache[p] = (j && j[0]) ? [j[0].geometry.coordinates[1], j[0].geometry.coordinates[0]] : 0;
-    }catch(e){ geoCache[p] = 0; }
-    store.set("geoCache", geoCache);
-    await new Promise(r => setTimeout(r, 300));
-  }
-  if (todo.length){ rows.forEach(o => o.ll = o.ll || coordsFrom(o) || null); render(); }
-}
-
 async function load(){
+  if (!SCRIPT_URL){ msg("まだスプレッドシートとつながっていません（SCRIPT_URL が未設定）。"); return; }
   $("#updated").textContent = "読み込み中…";
-  const all = []; let ok = 0;
-  for (const name of SHEETS){
-    try{
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(name)}&_=${Date.now()}`;
-      const r = await fetch(url);
-      if (!r.ok) continue;
-      const text = await r.text();
-      if (/^\s*</.test(text)) continue;           // HTML（非公開など）
-      ok++;
-      all.push(...toObjects(parseCSV(text)).map(o => ({...o, src:name})));
-    }catch(e){}
-  }
-  if (!ok){
-    $("#msg").innerHTML = `<div class="box err">スプレッドシートを読み込めませんでした。共有設定が「リンクを知っている全員（閲覧者）」になっているか確認してください。</div>`;
+  try{
+    const r = await fetch(SCRIPT_URL + "?_=" + Date.now());
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error);
+    ingest(j.data);
+    msg("");
+    $("#updated").textContent = "最終更新 " + new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"});
+    render();
+  }catch(e){
+    msg("読み込めませんでした。電波の良いところで「↻ 更新」を押してください。");
     $("#updated").textContent = "読み込み失敗";
-    return;
   }
-  $("#msg").innerHTML = "";
-  all.forEach((o, i) => { o.id = i; o.t = typeOf(o.type); o.ll = coordsFrom(o); o.ts = Date.parse((o.time||"").replace(/\//g,"-").replace(" ","T")) || 0; });
-  rows = all;
-  $("#updated").textContent = "最終更新 " + new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"});
-  render();
-  geocodeMissing();
+}
+function ingest(d){
+  const num = v => { const n = parseFloat(v); return isFinite(n) ? n : null; };
+  const ts = s => Date.parse((s || "").replace(/\//g, "-").replace(" ", "T")) || 0;
+  const all = (d["スポット"] || []).map((o, i) => ({
+    id:o["ID"] || "r" + i, time:o["日時"], ts:ts(o["日時"]), kind:o["区分"] || "スポット",
+    name:o["名前"] || "", type:o["種類"] || "その他", addr:o["住所"] || "", url:o["GoogleマップURL"] || "",
+    desc:o["ひとこと"] || "", price:o["値段"] || "", hours:o["営業時間"] || "", parking:o["駐車場"] || "",
+    by:o["追加した人"] || "", ll:(num(o["緯度"]) != null && num(o["経度"]) != null) ? [num(o["緯度"]), num(o["経度"])] : null,
+    hidden:/^(非表示|削除)$/.test(o["表示"] || ""),
+  })).filter(o => !o.hidden && (o.name || o.addr));
+  all.forEach(o => { if (!TYPES.some(T => T.key === o.type)) o.type = "その他"; });
+  darts = all.filter(o => o.kind === "ダーツ").sort((a, b) => b.ts - a.ts);
+  spots = all.filter(o => o.kind !== "ダーツ");
+  comments = (d["コメント"] || []).map(o => ({
+    id:o["ID"], time:o["日時"], ts:ts(o["日時"]), spot:o["スポットID"], name:o["名前"] || "名無し",
+    car:o["号車"] || "", went:/^(はい|TRUE|1|行った)$/i.test(o["行った"] || ""), text:o["コメント"] || "",
+  }));
+  settings = {};
+  (d["設定"] || []).forEach(o => settings[o["ID"]] = o["値"]);
+  $("#carCount").value = settings["台数"] || "";
+}
+function msg(t){ $("#msg").innerHTML = t ? `<div class="box err">${esc(t)}</div>` : ""; }
+function toast(t){
+  const e = document.createElement("div"); e.className = "toast"; e.textContent = t;
+  document.body.appendChild(e); setTimeout(() => e.remove(), 2600);
 }
 
+/* ---------- 便利関数 ---------- */
 function km(a, b){
   const R = 6371, r = x => x * Math.PI / 180;
   const d1 = r(b[0]-a[0]), d2 = r(b[1]-a[1]);
   const h = Math.sin(d1/2)**2 + Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(d2/2)**2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
-function navUrl(o){
-  const dest = o.ll ? o.ll.join(",") : (o.place || o.name);
-  return "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + encodeURIComponent(dest);
-}
-function gmapUrl(o){
-  if (/^https?:/.test(o.place)) return o.place;
-  if (/^https?:/.test(o.url) && /google|goo\.gl/.test(o.url)) return o.url;
-  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.ll ? o.ll.join(",") : (o.name + " " + o.place));
-}
-function timeLabel(o){
-  if (!o.ts) return o.time || "";
-  return new Date(o.ts).toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"});
+const typeColor = t => cssVar((TYPES.find(T => T.key === t) || TYPES[4]).color);
+const where = o => o.ll ? o.ll.join(",") : (o.addr || o.name);
+const navUrl = o => "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + encodeURIComponent(where(o));
+const gmapUrl = o => isUrl(o.url) ? o.url : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.ll ? o.ll.join(",") : (o.name + " " + o.addr));
+const embedUrl = (o, z) => "https://maps.google.com/maps?hl=ja&output=embed&z=" + z + "&q=" + encodeURIComponent(o.ll ? o.ll.join(",") : (o.addr || o.name));
+const hhmm = o => o.ts ? new Date(o.ts).toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}) : (o.time || "");
+const who = c => esc(c.name) + (c.car ? `<span class="note">（${esc(c.car)}）</span>` : "");
+const cmtsOf = id => comments.filter(c => c.spot === id).sort((a, b) => a.ts - b.ts);
+const wentOf = id => comments.filter(c => c.spot === id && c.went);
+
+/* ---------- 描画 ---------- */
+function render(){ renderDart(); renderChips(); renderList(); renderLog(); if (tab === "map") renderMap(); }
+
+function renderDart(){
+  const d = darts[0];
+  if (!d){
+    $("#dart").innerHTML = `<div class="box dart empty"><div class="lbl">🎯 ダーツの着地点</div>
+      <p class="note" style="margin:6px 0 10px">まだ登録されていません</p>
+      <button class="btn primary" data-act="dart">🎯 着地点を登録</button></div>`;
+    return;
+  }
+  $("#dart").innerHTML = `<div class="box dart"><div class="in">
+      <div class="lbl">🎯 ダーツの着地点 <span class="note">${esc(hhmm(d))}</span></div>
+      <h2>${esc(d.name)}</h2>
+      ${d.desc ? `<div>${esc(d.desc)}</div>` : ""}
+      ${d.addr && !isUrl(d.addr) && d.addr !== d.name ? `<div class="note">${esc(d.addr)}</div>` : ""}
+      <div class="acts">
+        <a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(d)}">ナビ</a>
+        <a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(d))}">Googleマップ</a>
+        <button class="btn small" data-act="dart">着地点を変更</button>
+      </div>
+      ${darts.length > 1 ? `<div class="prev">前の着地点：${darts.slice(1).map(x => esc(x.name)).join("、")}</div>` : ""}
+    </div>
+    <iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${embedUrl(d, 11)}" title="着地点の地図"></iframe></div>`;
 }
 
 function renderChips(){
   const counts = {};
-  rows.forEach(o => counts[o.t.key] = (counts[o.t.key]||0) + 1);
-  const list = [{key:"all", label:"すべて"}, ...TYPES.filter(T => T.key !== "車" && counts[T.key])];
-  $("#chips").innerHTML = list.map(T =>
-    `<button class="chip" data-k="${T.key}" aria-pressed="${filter===T.key}">${T.label}${T.key==="all" ? "" : " " + counts[T.key]}</button>`).join("");
+  spots.forEach(o => counts[o.type] = (counts[o.type] || 0) + 1);
+  const chip = (k, label, on) => `<button class="chip" data-type="${esc(k)}" aria-pressed="${on}">${label}</button>`;
+  const html = chip("all", "すべて " + spots.length, typeF === "all") +
+    TYPES.filter(T => counts[T.key]).map(T => chip(T.key, T.key + " " + counts[T.key], typeF === T.key)).join("");
+  $("#typeChips").innerHTML = html; $("#mapChips").innerHTML = html;
+  const sub = [["all","全部"],["not","まだ"],["went","行った"]].map(([k,l]) =>
+    `<button class="chip" data-sub="${k}" aria-pressed="${subF===k}">${l}</button>`).join("");
+  const sorts = [["new","新しい順"],["dart","着地点から近い順"],["near","現在地から近い順"]].filter(([k]) => k !== "dart" || (darts[0] && darts[0].ll))
+    .map(([k,l]) => `<button class="chip" data-sort="${k}" aria-pressed="${sortBy===k}">${l}</button>`).join("");
+  $("#subChips").innerHTML = sub + `<span style="flex:none;width:6px"></span>` + sorts;
 }
 
-function renderCars(){
-  const latest = {};
-  rows.filter(o => o.t.key === "車").forEach(o => {
-    const k = o.by || o.name;
-    if (!latest[k] || o.ts >= latest[k].ts) latest[k] = o;
-  });
-  const shugo = rows.filter(o => o.t.key === "集合").sort((a,b) => b.ts - a.ts).slice(0, 1);
-  const items = [...shugo, ...Object.values(latest).sort((a,b) => (a.by||a.name).localeCompare(b.by||b.name, "ja", {numeric:true}))];
-  $("#carBox").hidden = !items.length;
-  $("#cars").innerHTML = items.map(o => `
-    <div class="car ${o.t.key==="集合" ? "shugo" : ""}">
-      <div><b>${o.t.key==="集合" ? "🚩 " + esc(o.name) : "🚗 " + esc(o.by || o.name)}</b> <span class="t">${esc(timeLabel(o))}</span></div>
-      <div>${esc(o.desc)}</div>
-      <div class="row" style="margin-top:4px">
-        <span class="note">${esc(/^https?:/.test(o.place) ? "" : o.place)}</span>
-        <a class="btn small" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a>
-        ${o.ll ? `<button class="btn small" data-show="${o.id}">地図</button>` : ""}
-      </div>
-    </div>`).join("");
-}
-
-function visible(){
-  let v = rows.filter(o => o.t.key !== "車" && (filter === "all" || o.t.key === filter));
-  if (sortNear && me) v.sort((a,b) => (a.ll ? km(me, a.ll) : 1e9) - (b.ll ? km(me, b.ll) : 1e9));
-  else v.sort((a,b) => b.ts - a.ts || b.id - a.id);
+function filtered(){
+  let v = spots.filter(o => typeF === "all" || o.type === typeF);
+  if (subF !== "all") v = v.filter(o => (wentOf(o.id).length > 0) === (subF === "went"));
   return v;
 }
+function origin(){ return sortBy === "near" ? me : sortBy === "dart" ? (darts[0] && darts[0].ll) : null; }
 
-function renderList(v){
-  if (!v.length){ $("#list").innerHTML = `<div class="empty">まだスポットがありません。<br>見つけたら「＋ 追加する」から送ってください。</div>`; return; }
+function renderList(){
+  const v = filtered(), o0 = origin();
+  if (o0) v.sort((a, b) => (a.ll ? km(o0, a.ll) : 1e9) - (b.ll ? km(o0, b.ll) : 1e9));
+  else v.sort((a, b) => b.ts - a.ts);
+  if (!v.length){
+    $("#list").innerHTML = `<div class="empty">${spots.length ? "条件に合うスポットがありません" : "まだスポットがありません。<br>見つけたら「＋ スポット追加」から登録してください。"}</div>`;
+    return;
+  }
   $("#list").innerHTML = v.map(o => {
-    const d = (me && o.ll) ? `<span class="dist">約${km(me, o.ll).toFixed(1)}km</span>` : "";
-    const info = [["値段",o.price],["営業",o.hours],["団体",o.group],["場所",/^https?:/.test(o.place) ? "" : o.place]].filter(x => x[1]);
-    const link = /^https?:/.test(o.url) ? `<a class="btn small" target="_blank" rel="noopener" href="${esc(o.url)}">詳細</a>` : "";
-    return `<article class="card" id="c${o.id}">
-      <h3><span class="tag" style="background:${cssVar(o.t.color)}">${o.t.label}</span>${esc(o.name)} ${d}</h3>
+    const went = wentOf(o.id), cs = cmtsOf(o.id);
+    const dist = (o0 && o.ll) ? `<span class="dist">約${km(o0, o.ll).toFixed(1)}km</span>` : "";
+    const park = o.parking ? `<span class="badge">🅿 駐車場 ${esc(o.parking)}</span>` : "";
+    const info = [["値段", o.price], ["営業", o.hours], ["住所", isUrl(o.addr) ? "" : o.addr]].filter(x => x[1]);
+    const mine = user.name && went.some(c => c.name === user.name);
+    return `<article class="card" id="c-${esc(o.id)}">
+      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)} ${dist}</h3>
+      ${park || went.length ? `<div class="row" style="margin:2px 0">${park}${went.length ? `<span class="badge ok">✅ 行った ${went.length}</span>` : ""}</div>` : ""}
       ${o.desc ? `<div class="desc">${esc(o.desc)}</div>` : ""}
-      ${info.length ? `<dl>${info.map(([k,x]) => `<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>` : ""}
-      <div class="foot">
-        <span class="by">${esc(o.by)}${o.by && timeLabel(o) ? "・" : ""}${esc(timeLabel(o))}</span>
-        <span class="row">
-          ${o.ll ? `<button class="btn small" data-show="${o.id}">地図</button>` : ""}
-          <a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(o))}">Googleマップ</a>
-          ${link}
-          <a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a>
-        </span>
+      ${info.length ? `<dl>${info.map(([k, x]) => `<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>` : ""}
+      <div class="by">${o.by ? esc(o.by) + "が追加・" : ""}${esc(hhmm(o))}</div>
+      ${cs.length ? `<div class="cmts">${cs.map(c => `<div class="cmt">${c.went ? "✅ " : "💬 "}<b>${who(c)}</b> ${esc(c.text)} <span class="t">${esc(hhmm(c))}</span></div>`).join("")}</div>` : ""}
+      <div class="acts">
+        <button class="btn small" data-act="cmt" data-id="${esc(o.id)}">💬 コメント</button>
+        <button class="btn small ${mine ? "on" : ""}" data-act="went" data-id="${esc(o.id)}">✅ 行った</button>
+        <button class="btn small" data-act="gmap" data-id="${esc(o.id)}">${openMaps.has(o.id) ? "地図を閉じる" : "🗺 地図"}</button>
+        <a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a>
       </div>
+      ${openMaps.has(o.id) ? `<iframe class="gmap" loading="lazy" src="${embedUrl(o, 15)}" title="${esc(o.name)}の地図"></iframe>
+        <div class="acts"><a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(o))}">Googleマップで開く</a></div>` : ""}
     </article>`;
   }).join("");
 }
 
-function pinIcon(color){
-  return L.divIcon({className:"", html:`<div class="pin" style="background:${color}"></div>`, iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-24]});
+function renderLog(){
+  const byId = Object.fromEntries(spots.map(o => [o.id, o]));
+  const items = comments.filter(c => c.went && byId[c.spot]).map(c => ({ts:c.ts, html:`<div class="log"><span class="t">${esc(hhmm(c))}</span><br>
+      ✅ <b>${esc(byId[c.spot].name)}</b> <span class="note">${esc(byId[c.spot].type)}</span><br>${who(c)}${c.text ? "：" + esc(c.text) : ""}</div>`}));
+  const dItems = darts.map(d => ({ts:d.ts, html:`<div class="log" style="border-color:var(--c-dart)"><span class="t">${esc(hhmm(d))}</span><br>🎯 <b>ダーツの着地点：${esc(d.name)}</b></div>`}));
+  const all = [...items, ...dItems].sort((a, b) => b.ts - a.ts);
+  $("#log").innerHTML = all.length ? all.map(x => x.html).join("") :
+    `<div class="empty">まだ記録がありません。<br>スポットで「✅ 行った」を押すとここに残ります。</div>`;
 }
-const markers = {};
-function renderMap(v){
+
+function pin(color, label, big){
+  const s = big ? 38 : 28;
+  return L.divIcon({className:"", html:`<div class="pin${big ? " big" : ""}" style="background:${color}"><i>${label}</i></div>`,
+    iconSize:[s, s], iconAnchor:[s/2, s], popupAnchor:[0, -s + 4]});
+}
+function renderMap(){
   if (!window.L) return;
   if (!map){
-    map = L.map("map", {zoomControl:true}).setView([35.75, 139.9], 8);
-    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {maxZoom:18, attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>'}).addTo(map);
+    map = L.map("map").setView([35.75, 139.9], 8);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      maxZoom:19, subdomains:"abcd",
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>'}).addTo(map);
     layer = L.layerGroup().addTo(map);
   }
+  map.invalidateSize();
   layer.clearLayers();
   const pts = [];
-  const cars = rows.filter(o => o.t.key === "車" || o.t.key === "集合");
-  [...v, ...cars.filter(o => !v.includes(o))].forEach(o => {
+  filtered().forEach(o => {
     if (!o.ll) return;
-    const m = L.marker(o.ll, {icon:pinIcon(cssVar(o.t.color))})
-      .bindPopup(`<b>${esc(o.t.key==="車" ? (o.by||o.name) : o.name)}</b><br>${esc(o.desc)}<br><a target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a>`)
-      .on("click", () => { const c = $("#c"+o.id); if (c){ document.querySelectorAll(".card.focus").forEach(e => e.classList.remove("focus")); c.classList.add("focus"); } });
-    m.addTo(layer); markers[o.id] = m; pts.push(o.ll);
+    const went = wentOf(o.id).length;
+    markers[o.id] = L.marker(o.ll, {icon:pin(typeColor(o.type), went ? "✓" : "")})
+      .bindPopup(`<b>${esc(o.name)}</b> <span class="note">${esc(o.type)}</span>${o.desc ? "<br>" + esc(o.desc) : ""}
+        <div class="acts"><button class="btn small" data-act="goto" data-id="${esc(o.id)}">詳しく</button>
+        <a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a></div>`)
+      .addTo(layer);
+    pts.push(o.ll);
+  });
+  darts.forEach((d, i) => {
+    if (!d.ll) return;
+    L.marker(d.ll, {icon:pin(cssVar("--c-dart"), "🎯", i === 0), zIndexOffset:1000, opacity:i === 0 ? 1 : .6})
+      .bindPopup(`<b>🎯 ${esc(d.name)}</b><div class="acts"><a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(d)}">ナビ</a></div>`).addTo(layer);
+    pts.push(d.ll);
   });
   if (me) pts.push(me);
-  if (!map._fitted && pts.length){ map.fitBounds(pts, {padding:[30,30], maxZoom:14}); map._fitted = true; }
+  if (!fitted && pts.length){ map.fitBounds(pts, {padding:[30, 30], maxZoom:14}); fitted = true; }
 }
 
-function render(){
-  renderChips(); renderCars();
-  const v = visible();
-  renderList(v); renderMap(v);
+/* ---------- 入力ダイアログ ---------- */
+function carOptions(sel){
+  const n = Math.max(0, Math.min(20, parseInt(settings["台数"]) || 0));
+  const list = n ? Array.from({length:n}, (_, i) => (i + 1) + "号車") : [];
+  if (sel && !list.includes(sel)) list.push(sel);
+  return `<option value="">（選ばない）</option>` + list.map(c => `<option ${c === sel ? "selected" : ""}>${esc(c)}</option>`).join("");
+}
+const whoFields = () => `<div class="two">
+  <div><label>あなたの名前 *</label><input type="text" name="name" required maxlength="20" value="${esc(user.name)}"></div>
+  <div><label>号車</label><select name="car">${carOptions(user.car)}</select></div></div>`;
+const seg = (name, opts, sel) => `<div class="seg">${opts.map((o, i) =>
+  `<input type="radio" id="${name}${i}" name="${name}" value="${esc(o)}" ${o === sel ? "checked" : ""}><label for="${name}${i}">${esc(o)}</label>`).join("")}</div>`;
+
+function openDialog(html, onSubmit){
+  const f = $("#dlgForm");
+  f.innerHTML = html + `<div class="dlg-acts"><button type="button" class="btn" id="dlgCancel">やめる</button>
+    <button class="btn primary" id="dlgOk">送る</button></div>`;
+  $("#dlgCancel").onclick = () => $("#dlg").close();
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const fd = Object.fromEntries(new FormData(f));
+    if (fd.name !== undefined){ user.name = fd.name.trim(); user.car = fd.car || ""; store.set("user", user); }
+    const ok = $("#dlgOk"); ok.disabled = true; ok.textContent = "送信中…";
+    try{ await onSubmit(fd); $("#dlg").close(); await load(); }
+    catch(err){ ok.disabled = false; ok.textContent = "送る"; alert("送れませんでした：" + err.message + "\n電波を確認してもう一度試してください。"); }
+  };
+  $("#dlg").showModal();
+}
+function needScript(){ if (!SCRIPT_URL){ alert("まだスプレッドシートとつながっていません。"); return true; } return false; }
+const byLabel = fd => fd.name + (fd.car ? "（" + fd.car + "）" : "");
+
+function addSpot(){
+  if (needScript()) return;
+  openDialog(`<h2>＋ スポット追加</h2>
+    <label>名前 *</label><input type="text" name="spot" required maxlength="60" placeholder="例：〇〇食堂、△△城跡">
+    <label>種類</label>${seg("type", TYPES.map(T => T.key), "飯")}
+    <label>住所</label><input type="text" name="addr" placeholder="例：埼玉県秩父市番場町1-3">
+    <label>Googleマップのリンク</label><input type="url" name="url" placeholder="https://maps.app.goo.gl/…">
+    <div class="hint">住所かリンクのどちらかがあれば地図にピンが立ちます</div>
+    <label>ひとこと</label><textarea name="desc" placeholder="名物、おすすめポイントなど"></textarea>
+    <div class="two"><div><label>値段の目安</label><input type="text" name="price" placeholder="例：1,000円くらい"></div>
+    <div><label>営業時間</label><input type="text" name="hours" placeholder="例：11〜20時"></div></div>
+    <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], "")}
+    ${whoFields()}`, fd => api({sheet:"スポット", action:"append", row:{
+      "区分":"スポット", "名前":fd.spot, "種類":fd.type || "その他", "住所":fd.addr, "GoogleマップURL":fd.url,
+      "ひとこと":fd.desc, "値段":fd.price, "営業時間":fd.hours, "駐車場":fd.parking || "", "追加した人":byLabel(fd)}})
+      .then(() => toast("追加しました")));
+}
+function addDart(){
+  if (needScript()) return;
+  openDialog(`<h2>🎯 ダーツの着地点を登録</h2>
+    <label>地名 *</label><input type="text" name="spot" required maxlength="60" placeholder="例：群馬県 みなかみ町">
+    <label>住所や目印</label><input type="text" name="addr" placeholder="例：群馬県利根郡みなかみ町">
+    <label>Googleマップのリンク</label><input type="url" name="url" placeholder="https://maps.app.goo.gl/…">
+    <label>ひとこと</label><input type="text" name="desc" placeholder="例：1投目！">
+    ${whoFields()}`, fd => api({sheet:"スポット", action:"append", row:{
+      "区分":"ダーツ", "名前":fd.spot, "住所":fd.addr || fd.spot, "GoogleマップURL":fd.url, "ひとこと":fd.desc, "追加した人":byLabel(fd)}})
+      .then(() => toast("着地点を登録しました")));
+}
+function addComment(id, went){
+  if (needScript()) return;
+  const o = spots.find(s => s.id === id); if (!o) return;
+  openDialog(`<h2>${went ? "✅ 行った！" : "💬 コメント"}</h2>
+    <div class="note">${esc(o.name)}</div>
+    <label>コメント${went ? "（感想があれば）" : " *"}</label>
+    <textarea name="text" ${went ? "" : "required"} maxlength="300" placeholder="${went ? "例：わらじかつ最高だった" : "例：ここ行きたい！／しょぼかったよ"}"></textarea>
+    <label class="check"><input type="checkbox" name="went" ${went ? "checked" : ""}> ここに行った</label>
+    ${whoFields()}`, fd => api({sheet:"コメント", action:"append", row:{
+      "スポットID":id, "名前":fd.name, "号車":fd.car, "行った":fd.went ? "はい" : "", "コメント":fd.text}})
+      .then(() => toast(fd.went ? "行った記録に残しました" : "コメントしました")));
 }
 
-/* events */
-$("#chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; filter = b.dataset.k; map && (map._fitted = false); render(); });
+/* ---------- 操作 ---------- */
 document.addEventListener("click", e => {
-  const b = e.target.closest("[data-show]"); if (!b) return;
-  const o = rows.find(r => r.id == b.dataset.show); if (!o || !o.ll || !map) return;
-  $("#map").classList.remove("hidden"); $("#mapBtn").textContent = "地図を隠す"; map.invalidateSize();
-  map.setView(o.ll, 15); markers[o.id] && markers[o.id].openPopup();
-  $("#map").scrollIntoView({behavior:"smooth", block:"center"});
+  const t = e.target.closest("[data-tab],[data-type],[data-sub],[data-sort],[data-act]");
+  if (!t) return;
+  if (t.dataset.tab){
+    tab = t.dataset.tab;
+    document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b === t));
+    ["list", "map", "log"].forEach(k => $("#p-" + k).hidden = k !== tab);
+    if (tab === "map") renderMap();
+    return;
+  }
+  if (t.dataset.type){ typeF = t.dataset.type; fitted = false; render(); return; }
+  if (t.dataset.sub){ subF = t.dataset.sub; fitted = false; render(); return; }
+  if (t.dataset.sort){
+    const k = t.dataset.sort;
+    if (k === "near" && !me){ locateMe(() => { sortBy = "near"; render(); }); return; }
+    sortBy = k; render(); return;
+  }
+  const id = t.dataset.id, act = t.dataset.act;
+  if (act === "dart") addDart();
+  else if (act === "cmt") addComment(id, false);
+  else if (act === "went") addComment(id, true);
+  else if (act === "gmap"){ openMaps.has(id) ? openMaps.delete(id) : openMaps.add(id); renderList(); }
+  else if (act === "goto"){
+    $('[data-tab="list"]').click();
+    const c = document.getElementById("c-" + id);
+    if (c){ document.querySelectorAll(".card.focus").forEach(x => x.classList.remove("focus")); c.classList.add("focus"); c.scrollIntoView({behavior:"smooth", block:"center"}); }
+  }
 });
-$("#reload").onclick = load;
-$("#mapBtn").onclick = () => {
-  const h = $("#map").classList.toggle("hidden");
-  $("#mapBtn").textContent = h ? "地図を出す" : "地図を隠す";
-  if (!h && map) map.invalidateSize();
-};
-$("#sortBtn").onclick = () => {
-  if (sortNear){ sortNear = false; $("#sortBtn").textContent = "並び：新しい順"; render(); return; }
+function locateMe(done){
   if (!navigator.geolocation){ alert("この端末では現在地が使えません"); return; }
-  $("#sortBtn").textContent = "現在地を取得中…";
+  toast("現在地を取得中…");
   navigator.geolocation.getCurrentPosition(p => {
-    me = [p.coords.latitude, p.coords.longitude]; sortNear = true;
-    $("#sortBtn").textContent = "並び：近い順";
-    if (map){
-      meMarker && meMarker.remove();
-      meMarker = L.marker(me, {icon:L.divIcon({className:"", html:'<div class="me"></div>', iconSize:[16,16], iconAnchor:[8,8]})}).addTo(map).bindPopup("現在地");
-    }
-    render();
-  }, () => { $("#sortBtn").textContent = "並び：新しい順"; alert("現在地を取得できませんでした（位置情報の許可を確認してください）"); }, {enableHighAccuracy:true, timeout:10000});
+    me = [p.coords.latitude, p.coords.longitude];
+    if (map){ meMarker && meMarker.remove();
+      meMarker = L.marker(me, {icon:L.divIcon({className:"", html:'<div class="me"></div>', iconSize:[16, 16], iconAnchor:[8, 8]})}).addTo(map); }
+    done();
+  }, () => alert("現在地を取得できませんでした（位置情報の許可を確認してください）"), {enableHighAccuracy:true, timeout:10000});
+}
+$("#addBtn").onclick = addSpot;
+$("#reload").onclick = load;
+$("#saveCars").onclick = async () => {
+  if (needScript()) return;
+  const n = parseInt($("#carCount").value);
+  if (!(n >= 1 && n <= 20)){ alert("1〜20の数字を入れてください"); return; }
+  try{ await api({sheet:"設定", action:"update", id:"台数", row:{"値":String(n)}}); toast("台数を " + n + " 台にしました"); load(); }
+  catch(e){ alert("保存できませんでした"); }
 };
-if (FORM_URL){ $("#addBtn").href = FORM_URL; $("#addBtn").hidden = false; }
 
-load(); setInterval(() => { if (!document.hidden) load(); }, 60000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+load();
+setInterval(() => { if (!document.hidden && !$("#dlg").open) load(); }, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !$("#dlg").open) load(); });
 </script>
 </body>
 </html>
