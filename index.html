@@ -79,16 +79,9 @@ details summary{cursor:pointer;color:var(--sub);font-size:13px}
     <div class="meta">
       <span id="updated">読み込み中…</span>
       <button class="btn small" id="reload">↻ 更新</button>
+      <a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=%E8%A5%BF%E5%8D%83%E8%91%89%E9%A7%85&travelmode=driving">🚗 西千葉駅までのルート</a>
     </div>
   </header>
-
-  <div class="box return">
-    <div>
-      <div class="note">西千葉駅 22:00着まで</div>
-      <b id="left">--</b>
-    </div>
-    <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=%E8%A5%BF%E5%8D%83%E8%91%89%E9%A7%85&travelmode=driving">🚗 西千葉駅までの時間を見る</a>
-  </div>
 
   <div id="msg"></div>
 
@@ -121,7 +114,6 @@ details summary{cursor:pointer;color:var(--sub);font-size:13px}
 const SHEET_ID = "16sbgEbDFIKZPAaduDGUpj8yQIkxpd27yWyjFr2yTsCM";
 const SHEETS   = ["スポット", "フォームの回答 1"];   // 読み込むタブ名（無いタブは無視）
 const FORM_URL = "";                                  // Googleフォームの回答用URLを入れる
-const GOAL_HOUR = 22;
 /* ================ */
 
 const TYPES = [
@@ -344,12 +336,6 @@ function render(){
   renderList(v); renderMap(v);
 }
 
-function updateLeft(){
-  const now = new Date(), goal = new Date(now); goal.setHours(GOAL_HOUR, 0, 0, 0);
-  const min = Math.round((goal - now) / 60000);
-  $("#left").textContent = min > 0 ? `あと ${Math.floor(min/60)}時間${min%60}分` : "22:00を過ぎています";
-}
-
 /* events */
 $("#chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; filter = b.dataset.k; map && (map._fitted = false); render(); });
 document.addEventListener("click", e => {
@@ -381,7 +367,6 @@ $("#sortBtn").onclick = () => {
 };
 if (FORM_URL){ $("#addBtn").href = FORM_URL; $("#addBtn").hidden = false; }
 
-updateLeft(); setInterval(updateLeft, 30000);
 load(); setInterval(() => { if (!document.hidden) load(); }, 60000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
 </script>
