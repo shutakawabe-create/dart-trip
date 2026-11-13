@@ -241,12 +241,12 @@ function applyLocal(body, serverRow, tmp){
   }
   else { const x = list.find(o => o["ID"] === body.id); if (x) Object.assign(x, body.row); }
   if (!DEMO) store.set("cache", raw);
-  ingest(raw); render();
+  ingest(raw); render(body.sheet === "コメント" || body.action === "update");
 }
 async function api(body){
-  if (DEMO){ const r = demoApi(body); raw = demoDB(); ingest(raw); render(); return r; }
+  if (DEMO){ const r = demoApi(body); raw = demoDB(); ingest(raw); render(body.sheet === "コメント" || body.action === "update"); return r; }
   pending++;
-  // 削除・復活・行きたい・行った・ひとことは、押した瞬間に画面へ出す（スポット追加だけは位置が入るのを待つ）
+  // 削除・復活・行きたい・行った・コメントは、押した瞬間に画面へ出す（スポット追加だけは位置が入るのを待つ）
   const quick = body.action === "update" || body.sheet === "コメント";
   const tmp = body.action === "append" && quick ? {...body.row, "ID":"tmp" + Date.now() + Math.random(), "日時":nowStr()} : null;
   if (quick) applyLocal(body, null, tmp);
@@ -261,11 +261,11 @@ async function api(body){
   }finally{
     pending--;
     if (!ok) load(true);
-    else if (!pending) setTimeout(() => load(), 1500);
+    else if (!pending) setTimeout(() => load(false, true), 1500);
   }
 }
 const stamp = () => $("#updated").textContent = new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}) + " 更新";
-async function load(force){
+async function load(force, keep){
   if (DEMO){
     raw = demoDB(); ingest(raw); render(); stamp();
     $("#msg").innerHTML = `<div class="box" style="border-color:var(--c-etc)"><b>お試しモード</b> <span class="note">書き込みはこの端末の中だけに保存されます。</span>
@@ -282,7 +282,7 @@ async function load(force){
     if (!j.ok) throw new Error(j.error);
     if (pending && !force) return;
     raw = j.data; store.set("cache", raw);
-    ingest(raw); msg(""); stamp(); render();
+    ingest(raw); msg(""); stamp(); render(keep);
   }catch(e){
     if (!raw){
       const c = store.get("cache", null);
@@ -315,7 +315,7 @@ function ingest(d){
   all.forEach(o => {
     if (!TYPES.some(T => T.key === o.type)) o.type = "その他";
     if (!o.name || /^(Google ?Maps|Google ?マップ|Googleマップのスポット)$/i.test(o.name)) o.name = "（名前なし・✏️で直せます）";
-    // 参加者が関わった時刻（追加・修正・ひとこと・反応のいちばん新しいもの）
+    // 参加者が関わった時刻（追加・修正・コメント・反応のいちばん新しいもの）
     const acts = [isHuman(o.by) ? o.ts : 0, isHuman(o.upBy) ? o.upTs : 0, ...comments.filter(c => c.spot === o.id).map(c => c.ts)];
     o.human = Math.max(0, ...acts);
   });
@@ -342,7 +342,7 @@ const reactors = (id, key) => [...new Set(cmtsOf(id).filter(c => c[key]).map(c =
 const mineOf = (id, key) => me ? cmtsOf(id).filter(c => c[key] && c.name === me) : [];
 
 /* ---------- 描画 ---------- */
-function render(){ renderDest(); renderChips(); renderList(); renderLog(); renderFoot(); }
+function render(keep){ renderDest(); renderChips(); renderList(keep); renderLog(); renderFoot(); }
 
 let lastEmbed = "";
 function renderDest(){
@@ -392,7 +392,7 @@ function card(o){
     <div class="reacts">
       <button class="rb w ${myWant ? "on" : ""}" data-act="want" data-id="${esc(o.id)}">🙋 行きたい${want.length ? " " + want.length : ""}</button>
       <button class="rb g ${myWent ? "on" : ""}" data-act="went" data-id="${esc(o.id)}">✅ 行った${went.length ? " " + went.length : ""}</button>
-      <button class="rb" data-act="cmt" data-id="${esc(o.id)}">💬${texts.length ? " " + texts.length : " ひとこと"}</button>
+      <button class="rb" data-act="cmt" data-id="${esc(o.id)}">💬${texts.length ? " " + texts.length : " コメント"}</button>
     </div>
     ${open ? `<div class="more">
       ${info.length ? `<dl>${info.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : ""}
@@ -410,12 +410,21 @@ function card(o){
     </div>` : ""}
   </article>`;
 }
-function renderList(){
+// 並びの写し。反応やコメントを押した直後は並びを変えず、次の更新（↻・開き直し）で並べ直す
+let snap = null;
+function renderList(keep){
   const v = spots.filter(o => typeF === "all" || o.type === typeF);
   const near = sortBy === "near" && dest && dest.ll;
   const cmp = near ? (a, b) => (a.ll ? km(dest.ll, a.ll) : 1e9) - (b.ll ? km(dest.ll, b.ll) : 1e9) : null;
-  const humans = v.filter(o => o.human).sort(cmp || ((a, b) => b.human - a.human || b.ts - a.ts || b.idx - a.idx));
-  const ai = v.filter(o => !o.human).sort(cmp || ((a, b) => b.ts - a.ts || b.idx - a.idx));
+  let humans = v.filter(o => o.human).sort(cmp || ((a, b) => b.human - a.human || b.ts - a.ts || b.idx - a.idx));
+  let ai = v.filter(o => !o.human).sort(cmp || ((a, b) => b.ts - a.ts || b.idx - a.idx));
+  if (keep && snap){
+    const pos = id => snap.h.includes(id) ? ["h", snap.h.indexOf(id)] : snap.a.includes(id) ? ["a", snap.a.indexOf(id)] : null;
+    const known = v.filter(o => pos(o.id));
+    humans = [...humans.filter(o => !pos(o.id)), ...known.filter(o => pos(o.id)[0] === "h").sort((a, b) => pos(a.id)[1] - pos(b.id)[1])];
+    ai = [...ai.filter(o => !pos(o.id)), ...known.filter(o => pos(o.id)[0] === "a").sort((a, b) => pos(a.id)[1] - pos(b.id)[1])];
+  }
+  snap = {h:humans.map(o => o.id), a:ai.map(o => o.id)};
   if (!v.length){
     $("#list").innerHTML = `<div class="empty">${spots.length ? "この種類はまだありません" : "まだスポットがありません。<br>見つけたら「＋ スポット追加」から。"}</div>`;
     return;
@@ -495,7 +504,7 @@ function spotDialog(o){
       <div class="acts"><a class="btn small" id="gsearch" target="_blank" rel="noopener" href="#">🔍 Googleマップで探す</a></div>
       <div class="hint">Googleマップでお店を開いて「共有」→「リンクをコピー」して貼ると、名前と場所が自動で入ります</div>`}
     <label>種類（なくてもOK）</label>${seg("type", TYPES.map(T => T.key), v.type && v.type !== "その他" ? v.type : (o ? "その他" : ""))}
-    <label>ひとこと（なくてもOK）</label><textarea name="desc" placeholder="名物、おすすめポイントなど">${esc(v.desc)}</textarea>
+    <label>説明（なくてもOK）</label><textarea name="desc" placeholder="名物、おすすめポイントなど">${esc(v.desc)}</textarea>
     <details class="opt" ${o && (v.parking || v.price || v.hours || v.addr) ? "open" : ""}><summary>詳しく（駐車場・値段・営業時間・住所）</summary>
       <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], v.parking)}
       <div class="two"><div><label>値段の目安</label><input type="text" name="price" value="${esc(v.price)}" placeholder="例：1,000円くらい"></div>
@@ -523,11 +532,11 @@ function spotDialog(o){
 }
 function cmtDialog(id){
   const o = spots.find(s => s.id === id); if (!o) return;
-  openDialog(`<h2>💬 ${esc(o.name)}</h2><textarea name="text" maxlength="300" placeholder="例：ここ最高！／ちょっとしょぼかった" required></textarea>`,
-    fd => { if (!fd.text) return warn("ひとこと書いてね");
+  openDialog(`<h2>💬 コメント</h2><div class="note">${esc(o.name)}</div><textarea name="text" maxlength="300" placeholder="例：ここ最高！／ちょっとしょぼかった" required></textarea>`,
+    fd => { if (!fd.text) return warn("コメントを書いてね");
       $("#dlg").close();
       api({sheet:"コメント", action:"append", row:{"スポットID":id, "名前":me, "コメント":fd.text}})
-        .catch(() => alert("ひとことを送れませんでした。電波を確認してもう一度送ってください。"));
+        .catch(() => alert("コメントを送れませんでした。電波を確認してもう一度送ってください。"));
     });
 }
 const busy = new Set();   // 送信中は同じボタンを受け付けない（二重に記録されるのを防ぐ）
@@ -575,7 +584,7 @@ document.addEventListener("click", e => {
       setRow("スポット", id, {"表示":"非表示", "削除した人":me, "削除日時":nowStr()}, "消しました");
   }
   else if (act === "restore"){ const x = trashed.find(s => s.id === id); if (x) setRow("スポット", id, {"表示":"", "削除した人":"", "削除日時":""}, `「${x.name}」を元に戻しました`); }
-  else if (act === "delCmt"){ if (confirm("このひとことを消しますか？（元に戻せません）")) setRow("コメント", id, {"表示":"非表示"}, "消しました"); }
+  else if (act === "delCmt"){ if (confirm("このコメントを消しますか？（元に戻せません）")) setRow("コメント", id, {"表示":"非表示"}, "消しました"); }
 });
 $("#addBtn").onclick = () => { if (needName()) spotDialog(null); };
 $("#reload").onclick = () => load(true);
