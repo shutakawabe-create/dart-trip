@@ -33,6 +33,9 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
+button,a,.card{-webkit-tap-highlight-color:transparent;touch-action:manipulation}   /* 連打でズームされない・反応の遅れをなくす */
+.more{animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
 a{color:inherit}
 .wrap{max-width:720px;margin:0 auto;padding:0 16px 110px}
@@ -418,8 +421,8 @@ function renderChips(){
 
 function card(o){
   const open = openId === o.id;
-  const want = reactors(o.id, "want"), went = reactors(o.id, "went"), texts = cmtsOf(o.id).filter(c => c.text);
-  const myWant = mineOf(o.id, "want").length, myWent = mineOf(o.id, "went").length;
+  const want = reactNames(o.id, "want"), went = reactNames(o.id, "went"), texts = cmtsOf(o.id).filter(c => c.text);
+  const myWant = isOn(o.id, "want"), myWent = isOn(o.id, "went");
   const who = [isHuman(o.by) ? `${esc(o.by)}が追加` : "", isHuman(o.upBy) ? `${esc(o.upBy)}が更新` : ""].filter(Boolean).join("・");
   const T = TYPES.find(x => x.key === o.type) || TYPES[3];
   const info = [["駐車場", o.parking], ["値段", o.price], ["営業時間", o.hours], ["住所", o.addr]].filter(x => x[1]);
@@ -590,22 +593,52 @@ function cmtDialog(id){
         .catch(() => alert("コメントを送れませんでした。電波を確認してもう一度送ってください。"));
     });
 }
-const busy = new Set();   // 送信中は同じボタンを受け付けない（二重に記録されるのを防ぐ）
-async function toggle(id, key){
+/* 行きたい・行った：画面は押すたびにすぐ切り替え、送信は押し終わって0.6秒後に「最後の状態」だけ送る */
+const override = new Map(), timers = new Map(), syncing = new Set();
+const serverOn = (id, key) => mineOf(id, key).length > 0;
+const isOn = (id, key) => override.has(id + key) ? override.get(id + key) : serverOn(id, key);
+function reactNames(id, key){
+  const s = new Set(reactors(id, key));
+  if (me && override.has(id + key)) override.get(id + key) ? s.add(me) : s.delete(me);
+  return [...s];
+}
+function tapReact(id, key){
+  const k = id + key, on = !isOn(id, key);
+  override.set(k, on);
+  refreshCard(id, key);
+  if (on) toast(key === "want" ? "🙋 行きたい！" : "✅ 行った！");
+  clearTimeout(timers.get(k));
+  timers.set(k, setTimeout(() => syncReact(id, key), 600));
+}
+async function syncReact(id, key){
   const k = id + key;
-  if (busy.has(k)) return;
-  busy.add(k);
-  const mine = mineOf(id, key).filter(c => !String(c.id).startsWith("tmp"));   // 送信中の仮の行は取り消しに使わない
-  if (!mine.length && mineOf(id, key).length) return;
+  if (syncing.has(k)) return;              // 送信中に押されたら、送信が終わってから合わせ直す
+  syncing.add(k);
   try{
-    if (mine.length) await Promise.all(mine.map(c => api({sheet:"コメント", action:"update", id:c.id, row:{"表示":"非表示"}})));
-    else{
-      const label = key === "want" ? "行きたい" : "行った";
-      await api({sheet:"コメント", action:"append", row:{"スポットID":id, "名前":me, [label]:"はい"}});
-      toast(key === "want" ? "🙋 行きたい！" : "✅ 行った記録に残しました");
+    while (override.has(k) && override.get(k) !== serverOn(id, key)){
+      if (override.get(k)){
+        const label = key === "want" ? "行きたい" : "行った";
+        await api({sheet:"コメント", action:"append", row:{"スポットID":id, "名前":me, [label]:"はい"}});
+      } else {
+        await Promise.all(mineOf(id, key).filter(c => !String(c.id).startsWith("tmp"))
+          .map(c => api({sheet:"コメント", action:"update", id:c.id, row:{"表示":"非表示"}})));
+      }
     }
-  }catch(e){ alert("送れませんでした。電波を確認してもう一度押してください。"); }
-  finally{ busy.delete(k); }
+    override.delete(k);
+  }catch(e){
+    override.delete(k);
+    alert("送れませんでした。電波を確認してもう一度押してください。");
+  }finally{
+    syncing.delete(k);
+    refreshCard(id);
+  }
+}
+// カード1枚だけ描き直す（一覧全体を描き直さないので速く、ちらつかない）
+function refreshCard(id, pop){
+  const el = document.querySelector(`.card[data-card="${CSS.escape(id)}"]`), o = spots.find(x => x.id === id);
+  if (!el || !o) return;
+  el.outerHTML = card(o);
+  if (pop){ const nb = document.querySelector(`.card[data-card="${CSS.escape(id)}"] [data-act="${pop}"]`); if (nb) nb.classList.add("popnow"); }
 }
 async function setRow(sheet, id, row, done){
   try{ await api({sheet, action:"update", id, row}); toast(done); }
@@ -618,14 +651,15 @@ document.addEventListener("click", e => {
   if (!t) return;
   if (t.dataset.type){ typeF = t.dataset.type; renderChips(); renderList(); return; }
   if (t.dataset.sort){ sortBy = sortBy === "near" ? "new" : "near"; renderChips(); renderList(); return; }
-  if (t.dataset.card){ if (e.target.closest("a,button,.more")) return; openId = openId === t.dataset.card ? null : t.dataset.card; renderList(); return; }
-  const id = t.dataset.id, act = t.dataset.act, o = spots.find(x => x.id === id);
-  if (act === "want" || act === "went"){
-    if (!needName()) return;
-    toggle(id, act);
-    // 押したボタンだけを弾ませる（画面は描き直されるので、描き直した後のボタンに付ける）
-    requestAnimationFrame(() => { const nb = document.querySelector(`.card[data-card="${CSS.escape(id)}"] [data-act="${act}"]`); if (nb) nb.classList.add("popnow"); });
+  if (t.dataset.card){
+    if (e.target.closest("a,button,.more")) return;
+    const prev = openId; openId = openId === t.dataset.card ? null : t.dataset.card;
+    if (prev) refreshCard(prev);
+    if (openId) refreshCard(openId);
+    return;
   }
+  const id = t.dataset.id, act = t.dataset.act, o = spots.find(x => x.id === id);
+  if (act === "want" || act === "went"){ if (needName()) tapReact(id, act); }
   else if (act === "cmt"){ if (needName()) cmtDialog(id); }
   else if (act === "focus"){ focusId = id; renderDest(); window.scrollTo({top:0, behavior:"smooth"}); }
   else if (act === "unfocus"){ focusId = null; renderDest(); }
