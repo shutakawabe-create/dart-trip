@@ -163,7 +163,9 @@ details summary{cursor:pointer;color:var(--sub);font-size:13px}
 <script>
 /* ===== 設定 ===== */
 const SCRIPT_URL = "";   // Apps Script の「ウェブアプリのURL」を入れる
+const SHEET_ID = "16sbgEbDFIKZPAaduDGUpj8yQIkxpd27yWyjFr2yTsCM"; // Claudeに頼む文に使う
 /* ================ */
+const DEMO = !SCRIPT_URL || /[?&]demo/.test(location.search);
 
 const TYPES = [
   {key:"観光", color:"--c-kanko"},
@@ -188,25 +190,70 @@ const markers = {}, openMaps = new Set();
 const user = store.get("user", {name:"", car:""});
 
 /* ---------- 通信 ---------- */
+/* お試しモード：この端末の中だけにデータを保存する */
+const DEMO_SEED = {
+  "スポット":[
+    {"ID":"d01","日時":"2026/11/14 08:52","区分":"ダーツ","名前":"【お試し】埼玉県 秩父市","住所":"埼玉県秩父市","緯度":"35.9917","経度":"139.0856","ひとこと":"1投目！","追加した人":"幹事"},
+    {"ID":"s01","日時":"2026/11/14 09:20","区分":"スポット","名前":"【お試し】秩父神社","種類":"観光","住所":"埼玉県秩父市番場町1-3","緯度":"35.9975","経度":"139.0839","ひとこと":"秩父の総社。境内の彫刻が見どころ","値段":"無料","営業時間":"終日","駐車場":"あり","追加した人":"Claude"},
+    {"ID":"s02","日時":"2026/11/14 09:21","区分":"スポット","名前":"【お試し】わらじかつ亭","種類":"飯","住所":"埼玉県秩父市番場町1-21","緯度":"35.9969","経度":"139.0851","ひとこと":"秩父名物わらじかつ丼","値段":"1,000〜1,500円","営業時間":"11:00〜15:00頃","駐車場":"わからない","追加した人":"Claude"},
+    {"ID":"s03","日時":"2026/11/14 09:22","区分":"スポット","名前":"【お試し】祭の湯","種類":"温泉","住所":"埼玉県秩父市野坂町1-16-15","緯度":"35.9903","経度":"139.0858","ひとこと":"西武秩父駅直結の日帰り温泉","値段":"1,000円前後","営業時間":"10:00〜23:00","駐車場":"あり","追加した人":"Claude"},
+    {"ID":"s04","日時":"2026/11/14 09:40","区分":"スポット","名前":"【お試し】羊山公園","種類":"観光","住所":"埼玉県秩父市大宮6267","緯度":"35.9844","経度":"139.0927","ひとこと":"街を見下ろす公園","値段":"無料","営業時間":"終日","駐車場":"あり","追加した人":"たろう（2号車）"}],
+  "コメント":[
+    {"ID":"k01","日時":"2026/11/14 09:30","スポットID":"s02","名前":"はなこ","号車":"1号車","行った":"","コメント":"ここ行きたい！"},
+    {"ID":"k02","日時":"2026/11/14 12:10","スポットID":"s01","名前":"たろう","号車":"2号車","行った":"はい","コメント":"彫刻すごかった"}],
+  "設定":[{"ID":"台数","値":"4"}],
+};
+const demoDB = () => store.get("demoDB", null) || JSON.parse(JSON.stringify(DEMO_SEED));
+function demoApi(body){
+  const db = demoDB(), list = db[body.sheet] = db[body.sheet] || [];
+  const row = {...body.row};
+  if (body.action === "append"){
+    row["ID"] = Math.random().toString(36).slice(2, 10);
+    const d = new Date(), z = n => String(n).padStart(2, "0");
+    row["日時"] = `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
+    if (body.sheet === "スポット" && !row["緯度"] && darts[0] && darts[0].ll){   // 本番は住所から位置を出す。お試しでは着地点の近くに置く
+      row["緯度"] = String(darts[0].ll[0] + (Math.random() - .5) * .04); row["経度"] = String(darts[0].ll[1] + (Math.random() - .5) * .04);
+    }
+    list.push(row);
+  } else {
+    const x = list.find(o => o["ID"] === body.id);
+    x ? Object.assign(x, row) : list.push({"ID":body.id, ...row});
+  }
+  store.set("demoDB", db);
+  return {ok:true};
+}
+
+/* ---------- 通信 ---------- */
 async function api(body){
+  if (DEMO) return demoApi(body);
   const r = await fetch(SCRIPT_URL, {method:"POST", body:JSON.stringify(body)});
   const j = await r.json();
   if (!j.ok) throw new Error(j.error || "失敗しました");
   return j;
 }
+const stamp = pre => $("#updated").textContent = pre + new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"});
 async function load(){
-  if (!SCRIPT_URL){ msg("まだスプレッドシートとつながっていません（SCRIPT_URL が未設定）。"); return; }
+  if (DEMO){
+    ingest(demoDB()); render();
+    $("#msg").innerHTML = `<div class="box" style="border-color:var(--c-kai)"><b>お試しモード</b>
+      <div class="note">追加・コメント・行ったを自由に試せます。書き込みはこの端末の中だけに保存され、ほかの人には見えません。</div>
+      <div class="acts"><button class="btn small" id="demoReset">お試しデータを最初の状態に戻す</button></div></div>`;
+    $("#demoReset").onclick = () => { store.set("demoDB", null); fitted = false; load(); toast("最初の状態に戻しました"); };
+    stamp("お試し ");
+    return;
+  }
   $("#updated").textContent = "読み込み中…";
   try{
     const r = await fetch(SCRIPT_URL + "?_=" + Date.now());
     const j = await r.json();
     if (!j.ok) throw new Error(j.error);
-    ingest(j.data);
-    msg("");
-    $("#updated").textContent = "最終更新 " + new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"});
-    render();
+    store.set("cache", j.data);
+    ingest(j.data); msg(""); stamp("最終更新 "); render();
   }catch(e){
-    msg("読み込めませんでした。電波の良いところで「↻ 更新」を押してください。");
+    const c = store.get("cache", null);
+    if (c && !spots.length){ ingest(c); render(); }
+    msg(c ? "電波が弱いため、前に読み込んだ内容を表示しています。「↻ 更新」で再読み込みできます。"
+          : "読み込めませんでした。電波の良いところで「↻ 更新」を押してください。");
     $("#updated").textContent = "読み込み失敗";
   }
 }
@@ -275,6 +322,7 @@ function renderDart(){
         <a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(d))}">Googleマップ</a>
         <button class="btn small" data-act="dart">着地点を変更</button>
       </div>
+      <div class="acts"><button class="btn small" data-act="claude">🤖 Claudeに調べてもらう文をコピー</button></div>
       ${darts.length > 1 ? `<div class="prev">前の着地点：${darts.slice(1).map(x => esc(x.name)).join("、")}</div>` : ""}
     </div>
     <iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${embedUrl(d, 11)}" title="着地点の地図"></iframe></div>`;
@@ -316,7 +364,7 @@ function renderList(){
     const info = [["値段", o.price], ["営業", o.hours], ["住所", isUrl(o.addr) ? "" : o.addr]].filter(x => x[1]);
     const mine = user.name && went.some(c => c.name === user.name);
     return `<article class="card" id="c-${esc(o.id)}">
-      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)} ${dist}</h3>
+      <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)} ${dist}<button class="btn small" style="margin-left:auto;padding:2px 8px" data-act="edit" data-id="${esc(o.id)}" aria-label="直す">✏️</button></h3>
       ${park || went.length ? `<div class="row" style="margin:2px 0">${park}${went.length ? `<span class="badge ok">✅ 行った ${went.length}</span>` : ""}</div>` : ""}
       ${o.desc ? `<div class="desc">${esc(o.desc)}</div>` : ""}
       ${info.length ? `<dl>${info.map(([k, x]) => `<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>` : ""}
@@ -324,7 +372,7 @@ function renderList(){
       ${cs.length ? `<div class="cmts">${cs.map(c => `<div class="cmt">${c.went ? "✅ " : "💬 "}<b>${who(c)}</b> ${esc(c.text)} <span class="t">${esc(hhmm(c))}</span></div>`).join("")}</div>` : ""}
       <div class="acts">
         <button class="btn small" data-act="cmt" data-id="${esc(o.id)}">💬 コメント</button>
-        <button class="btn small ${mine ? "on" : ""}" data-act="went" data-id="${esc(o.id)}">✅ 行った</button>
+        <button class="btn small ${mine ? "on" : ""}" data-act="went" data-id="${esc(o.id)}">${mine ? "✅ 行った済み" : "✅ 行った"}</button>
         <button class="btn small" data-act="gmap" data-id="${esc(o.id)}">${openMaps.has(o.id) ? "地図を閉じる" : "🗺 地図"}</button>
         <a class="btn small primary" target="_blank" rel="noopener" href="${navUrl(o)}">ナビ</a>
       </div>
@@ -394,10 +442,10 @@ const whoFields = () => `<div class="two">
 const seg = (name, opts, sel) => `<div class="seg">${opts.map((o, i) =>
   `<input type="radio" id="${name}${i}" name="${name}" value="${esc(o)}" ${o === sel ? "checked" : ""}><label for="${name}${i}">${esc(o)}</label>`).join("")}</div>`;
 
-function openDialog(html, onSubmit){
+function openDialog(html, onSubmit, okLabel = "送る"){
   const f = $("#dlgForm");
   f.innerHTML = html + `<div class="dlg-acts"><button type="button" class="btn" id="dlgCancel">やめる</button>
-    <button class="btn primary" id="dlgOk">送る</button></div>`;
+    <button class="btn primary" id="dlgOk">${okLabel}</button></div>`;
   $("#dlgCancel").onclick = () => $("#dlg").close();
   f.onsubmit = async e => {
     e.preventDefault();
@@ -405,29 +453,45 @@ function openDialog(html, onSubmit){
     if (fd.name !== undefined){ user.name = fd.name.trim(); user.car = fd.car || ""; store.set("user", user); }
     const ok = $("#dlgOk"); ok.disabled = true; ok.textContent = "送信中…";
     try{ await onSubmit(fd); $("#dlg").close(); await load(); }
-    catch(err){ ok.disabled = false; ok.textContent = "送る"; alert("送れませんでした：" + err.message + "\n電波を確認してもう一度試してください。"); }
+    catch(err){ ok.disabled = false; ok.textContent = okLabel; if (err.message !== "キャンセルしました") alert("送れませんでした：" + err.message + "\n電波を確認してもう一度試してください。"); }
   };
   $("#dlg").showModal();
 }
-function needScript(){ if (!SCRIPT_URL){ alert("まだスプレッドシートとつながっていません。"); return true; } return false; }
+function needScript(){ return false; }
 const byLabel = fd => fd.name + (fd.car ? "（" + fd.car + "）" : "");
 
-function addSpot(){
-  if (needScript()) return;
-  openDialog(`<h2>＋ スポット追加</h2>
-    <label>名前 *</label><input type="text" name="spot" required maxlength="60" placeholder="例：〇〇食堂、△△城跡">
-    <label>種類</label>${seg("type", TYPES.map(T => T.key), "飯")}
-    <label>住所</label><input type="text" name="addr" placeholder="例：埼玉県秩父市番場町1-3">
-    <label>Googleマップのリンク</label><input type="url" name="url" placeholder="https://maps.app.goo.gl/…">
+const norm = t => (t || "").replace(/【.*?】|\s/g, "").toLowerCase();
+function addSpot(){ spotDialog(null); }
+function spotDialog(o){
+  const v = o || {type:"飯", parking:""};
+  openDialog(`<h2>${o ? "✏️ スポットを直す" : "＋ スポット追加"}</h2>
+    <label>名前 *</label><input type="text" name="spot" required maxlength="60" value="${esc(v.name)}" placeholder="例：〇〇食堂、△△城跡">
+    <label>種類</label>${seg("type", TYPES.map(T => T.key), v.type)}
+    <label>住所</label><input type="text" name="addr" value="${esc(v.addr)}" placeholder="例：埼玉県秩父市番場町1-3">
+    <label>Googleマップのリンク</label><input type="url" name="url" value="${esc(v.url)}" placeholder="https://maps.app.goo.gl/…">
     <div class="hint">住所かリンクのどちらかがあれば地図にピンが立ちます</div>
-    <label>ひとこと</label><textarea name="desc" placeholder="名物、おすすめポイントなど"></textarea>
-    <div class="two"><div><label>値段の目安</label><input type="text" name="price" placeholder="例：1,000円くらい"></div>
-    <div><label>営業時間</label><input type="text" name="hours" placeholder="例：11〜20時"></div></div>
-    <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], "")}
-    ${whoFields()}`, fd => api({sheet:"スポット", action:"append", row:{
-      "区分":"スポット", "名前":fd.spot, "種類":fd.type || "その他", "住所":fd.addr, "GoogleマップURL":fd.url,
-      "ひとこと":fd.desc, "値段":fd.price, "営業時間":fd.hours, "駐車場":fd.parking || "", "追加した人":byLabel(fd)}})
-      .then(() => toast("追加しました")));
+    <label>ひとこと</label><textarea name="desc" placeholder="名物、おすすめポイントなど">${esc(v.desc)}</textarea>
+    <div class="two"><div><label>値段の目安</label><input type="text" name="price" value="${esc(v.price)}" placeholder="例：1,000円くらい"></div>
+    <div><label>営業時間</label><input type="text" name="hours" value="${esc(v.hours)}" placeholder="例：11〜20時"></div></div>
+    <label>駐車場</label>${seg("parking", ["あり", "なし", "わからない"], v.parking)}
+    ${o ? `<div class="hint" style="margin-top:12px">追加した人：${esc(o.by || "不明")}</div>
+      <div class="acts"><button type="button" class="btn small" id="delSpot" style="color:var(--accent)">🗑 このスポットを消す</button></div>` : whoFields()}`,
+    fd => {
+      const row = {"名前":fd.spot, "種類":fd.type || "その他", "住所":fd.addr, "GoogleマップURL":fd.url,
+        "ひとこと":fd.desc, "値段":fd.price, "営業時間":fd.hours, "駐車場":fd.parking || ""};
+      if (!o){
+        const dup = spots.find(x => norm(x.name) === norm(fd.spot));
+        if (dup && !confirm(`「${dup.name}」はもう登録されています。それでも追加しますか？`)) return Promise.reject(new Error("キャンセルしました"));
+        return api({sheet:"スポット", action:"append", row:{"区分":"スポット", ...row, "追加した人":byLabel(fd)}}).then(() => toast("追加しました"));
+      }
+      if (fd.addr !== o.addr || fd.url !== o.url){ row["緯度"] = ""; row["経度"] = ""; }   // 場所が変わったら位置を取り直す
+      return api({sheet:"スポット", action:"update", id:o.id, row}).then(() => toast("直しました"));
+    });
+  if (o) $("#delSpot").onclick = async () => {
+    if (!confirm(`「${o.name}」を消しますか？`)) return;
+    try{ await api({sheet:"スポット", action:"update", id:o.id, row:{"表示":"非表示"}}); $("#dlg").close(); toast("消しました"); load(); }
+    catch(e){ alert("消せませんでした"); }
+  };
 }
 function addDart(){
   if (needScript()) return;
@@ -453,6 +517,32 @@ function addComment(id, went){
       .then(() => toast(fd.went ? "行った記録に残しました" : "コメントしました")));
 }
 
+function claudeText(){
+  const d = darts[0];
+  return `Googleスプレッドシート「ダーツの旅 スポット帳」（ID: ${SHEET_ID}）の「スポット」タブに、${d.name}${d.addr && d.addr !== d.name ? "（" + d.addr + "）" : ""}周辺の観光地・飯屋・日帰り温泉を、合わせて10件ほど調べて追加してください。
+
+・1件を1行にして、いちばん下に追記する（今ある行は消したり変えたりしない）
+・列は1行目の見出しに合わせる
+　ID：「c」＋英数字6文字（ほかの行と重ならないもの）
+　日時：今の日時（yyyy/MM/dd HH:mm）
+　区分：スポット
+　名前、種類（観光／飯／温泉／買い物・休憩／その他のどれか）
+　住所、緯度・経度（数字）、GoogleマップURL（わかれば）
+　ひとこと（名物や見どころを短く）、値段、営業時間（今日の曜日の時間）
+　駐車場（あり／なし／わからない）、追加した人：Claude
+・19人のサークルで車で移動するので、駐車場がある所と、大人数でも入りやすい所を優先する
+・今日やっていない店は入れない。同じ名前の行がすでにあれば追加しない
+・追加したら、名前と種類の一覧を返す`;
+}
+async function copyClaude(){
+  const t = claudeText();
+  try{ await navigator.clipboard.writeText(t); toast("コピーしました。Claudeのアプリに貼り付けてください"); }
+  catch(e){
+    openDialog(`<h2>🤖 Claudeに頼む文</h2><div class="note">長押しでコピーして、Claudeのアプリに貼り付けてください。</div>
+      <textarea readonly style="min-height:260px;font-size:14px">${esc(t)}</textarea>`, () => Promise.resolve(), "閉じる");
+  }
+}
+
 /* ---------- 操作 ---------- */
 document.addEventListener("click", e => {
   const t = e.target.closest("[data-tab],[data-type],[data-sub],[data-sort],[data-act]");
@@ -474,7 +564,15 @@ document.addEventListener("click", e => {
   const id = t.dataset.id, act = t.dataset.act;
   if (act === "dart") addDart();
   else if (act === "cmt") addComment(id, false);
-  else if (act === "went") addComment(id, true);
+  else if (act === "went"){
+    const mine = user.name && wentOf(id).filter(c => c.name === user.name);
+    if (mine && mine.length){
+      if (confirm("「行った」を取り消しますか？（コメントは残ります）"))
+        Promise.all(mine.map(c => api({sheet:"コメント", action:"update", id:c.id, row:{"行った":""}}))).then(() => { toast("取り消しました"); load(); });
+    } else addComment(id, true);
+  }
+  else if (act === "edit"){ const o = spots.find(x => x.id === id); o && spotDialog(o); }
+  else if (act === "claude") copyClaude();
   else if (act === "gmap"){ openMaps.has(id) ? openMaps.delete(id) : openMaps.add(id); renderList(); }
   else if (act === "goto"){
     $('[data-tab="list"]').click();
