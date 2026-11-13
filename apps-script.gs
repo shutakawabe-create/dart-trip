@@ -37,6 +37,7 @@ function doPost(e) {
     const ll = locate(row, found);
     if (ll) { row['緯度'] = ll[0]; row['経度'] = ll[1]; }
     if (!row['名前'] && found.name) row['名前'] = found.name;   // リンクだけのときは店名も入れる
+    if (!row['住所'] && found.addr) row['住所'] = found.addr;
   }
   if (req.sheet === 'スポット' && req.action === 'append' && !row['名前']) row['名前'] = 'Googleマップのスポット';
 
@@ -113,25 +114,31 @@ function locate(row, found) {
   found = found || {};
   const url = row['GoogleマップURL'] || '';
   if (/^https?:\/\//.test(url)) {
+    // スマホの共有リンク（maps.app.goo.gl）を本当のGoogleマップのURLまでたどる
+    const opt = { followRedirects: false, muteHttpExceptions: true, headers: {
+      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      'Accept-Language': 'ja,en;q=0.8',
+      'Cookie': 'CONSENT=YES+cb; SOCS=CAESEwgDEgk0ODE3Nzk3MjQaAmphIAEaBgiA_LyaBg' } };
     try {
       let u = url;
-      for (let i = 0; i < 5; i++) {
-        const pn = placeName(u);
-        if (pn) found.name = pn;
+      for (let i = 0; i < 8; i++) {
+        const c = String(u).match(/[?&]continue=([^&]+)/);          // 同意画面に飛ばされたら、本来の行き先へ
+        if (/consent\.google/.test(u) && c) { u = decodeURIComponent(c[1]); continue; }
+        if (!found.name) found.name = placeName(u);
         const ll = parseLL(u);
         if (ll) return ll;
-        const res = UrlFetchApp.fetch(u, { followRedirects: false, muteHttpExceptions: true });
+        const res = UrlFetchApp.fetch(u, opt);
         const h = res.getHeaders();
         const next = h['Location'] || h['location'];
         if (!next) {
-          const body = res.getContentText().slice(0, 300000);
+          const body = res.getContentText().slice(0, 500000);
           if (!found.name) {
-            const t = body.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/) || body.match(/<title>([^<]+)<\/title>/);
-            if (t) found.name = t[1].replace(/\s*[-·]\s*Google\s*(マップ|Maps).*$/, '').trim();
+            const t = body.match(/<meta[^>]+(?:property|itemprop)="(?:og:title|name)"[^>]+content="([^"]+)"/) || body.match(/<title>([^<]+)<\/title>/);
+            if (t) found.name = cleanName(t[1]);
           }
           const b = parseLL(body); if (b) return b; break;
         }
-        u = next;
+        u = next.indexOf('http') === 0 ? next : 'https://www.google.com' + next;
       }
     } catch (err) {}
   }
@@ -143,6 +150,7 @@ function locate(row, found) {
         .setBounds(KANTO[0], KANTO[1], KANTO[2], KANTO[3]).geocode(queries[i]);
       if (g.status === 'OK' && g.results.length) {
         const l = g.results[0].geometry.location;
+        if (!row['住所'] && !found.addr) found.addr = g.results[0].formatted_address.replace(/^日本、(〒\d{3}-\d{4} )?/, '');
         return [l.lat, l.lng];
       }
     } catch (err) {}
@@ -150,11 +158,20 @@ function locate(row, found) {
   return null;
 }
 
+// 「Google マップ」などの決まり文句だけなら名前として使わない
+function cleanName(t) {
+  t = String(t || '').replace(/&amp;/g, '&').replace(/\s*[-·]\s*Google\s*(マップ|Maps).*$/i, '').trim();
+  return /^(Google\s*(マップ|Maps)?)?$/i.test(t) ? '' : t;
+}
+
 // URLの /maps/place/店名/ の部分から店名を取り出す
 function placeName(s) {
-  const m = String(s).match(/\/maps\/place\/([^/@?]+)/);
+  const m = String(s).match(/\/maps\/(?:place|search)\/([^/@?]+)/) || String(s).match(/[?&]q=([^&]+)/);
   if (!m) return '';
-  try { return decodeURIComponent(m[1].replace(/\+/g, ' ')).trim(); } catch (err) { return ''; }
+  let n = '';
+  try { n = decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (err) { return ''; }
+  if (/^-?\d+\.\d+,\s*-?\d+\.\d+$/.test(n)) return '';   // 緯度経度だけなら名前ではない
+  return cleanName(n.split(/[,、]/)[0]);
 }
 
 function parseLL(s) {

@@ -88,6 +88,8 @@ dt{color:var(--sub)} dd{margin:0;overflow-wrap:anywhere}
 .names-line{font-size:13px;color:var(--sub);margin:2px 0}
 .cmt{font-size:14px;margin:3px 0}
 .cmt b{font-size:13px}
+.peek{margin-top:4px}
+.peek .cmt{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .x{border:0;background:none;color:var(--sub);font-size:15px;cursor:pointer;padding:0 6px}
 .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .empty{text-align:center;color:var(--sub);padding:28px 0}
@@ -187,7 +189,9 @@ const store = {
 };
 const z2 = n => String(n).padStart(2, "0");
 const nowStr = () => { const d = new Date(); return `${d.getFullYear()}/${z2(d.getMonth()+1)}/${z2(d.getDate())} ${z2(d.getHours())}:${z2(d.getMinutes())}`; };
-const parseTs = s => Date.parse((s || "").replace(/\//g, "-").replace(" ", "T")) || 0;
+// 「2026/11/14 0:22」「2026/11/14 0:22:00」など、どんな書き方でも時刻として読む
+const parseTs = s => { const m = String(s || "").match(/(\d{4})\D(\d{1,2})\D(\d{1,2})(?:\D+(\d{1,2}):(\d{1,2}))?/);
+  return m ? new Date(+m[1], m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0)).getTime() : 0; };
 
 let raw = null, spots = [], dest = null, comments = [], trashed = [];
 let tab = "list", typeF = "all", sortBy = "new", openId = null, focusId = null;
@@ -227,10 +231,14 @@ function demoApi(body){
 }
 
 /* ---------- 通信（書き込んだらまず手元を書き換えて、すぐ画面に出す） ---------- */
-function applyLocal(body, serverRow){
+function applyLocal(body, serverRow, tmp){
   if (!raw) return;
   const list = raw[body.sheet] = raw[body.sheet] || [];
-  if (body.action === "append") list.push(serverRow || {...body.row, "ID":"tmp" + Date.now(), "日時":nowStr()});
+  if (body.action === "append"){
+    if (tmp && serverRow) Object.assign(tmp, serverRow);          // 仮の行を本物に差し替える
+    else if (tmp) list.push(tmp);
+    else list.push(serverRow || {...body.row, "ID":"tmp" + Date.now(), "日時":nowStr()});
+  }
   else { const x = list.find(o => o["ID"] === body.id); if (x) Object.assign(x, body.row); }
   if (!DEMO) store.set("cache", raw);
   ingest(raw); render();
@@ -238,14 +246,17 @@ function applyLocal(body, serverRow){
 async function api(body){
   if (DEMO){ const r = demoApi(body); raw = demoDB(); ingest(raw); render(); return r; }
   pending++;
-  if (body.action === "update") applyLocal(body);
+  // 削除・復活・行きたい・行った・ひとことは、押した瞬間に画面へ出す（スポット追加だけは位置が入るのを待つ）
+  const quick = body.action === "update" || body.sheet === "コメント";
+  const tmp = body.action === "append" && quick ? {...body.row, "ID":"tmp" + Date.now() + Math.random(), "日時":nowStr()} : null;
+  if (quick) applyLocal(body, null, tmp);
   let ok = false;
   try{
     const r = await fetch(SCRIPT_URL, {method:"POST", body:JSON.stringify(body)});
     const j = await r.json();
     if (!j.ok) throw new Error(j.error || "失敗しました");
     ok = true;
-    if (body.action === "append") applyLocal(body, j.row);
+    if (body.action === "append") applyLocal(body, j.row, tmp);
     return j;
   }finally{
     pending--;
@@ -303,7 +314,7 @@ function ingest(d){
   })).filter(o => o.name || o.url || o.addr);
   all.forEach(o => {
     if (!TYPES.some(T => T.key === o.type)) o.type = "その他";
-    if (!o.name) o.name = "（Googleマップのスポット）";
+    if (!o.name || /^(Google ?Maps|Google ?マップ|Googleマップのスポット)$/i.test(o.name)) o.name = "（名前なし・✏️で直せます）";
     // 参加者が関わった時刻（追加・修正・ひとこと・反応のいちばん新しいもの）
     const acts = [isHuman(o.by) ? o.ts : 0, isHuman(o.upBy) ? o.upTs : 0, ...comments.filter(c => c.spot === o.id).map(c => c.ts)];
     o.human = Math.max(0, ...acts);
@@ -323,7 +334,7 @@ function km(a, b){
 }
 const typeColor = t => cssVar((TYPES.find(T => T.key === t) || TYPES[3]).color);
 const gmapUrl = o => isUrl(o.url) ? o.url : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.addr ? o.name + " " + o.addr : o.ll ? o.ll.join(",") : o.name);
-const embedUrl = (o, z) => "https://maps.google.com/maps?hl=ja&output=embed&z=" + z + "&q=" + encodeURIComponent(o.ll ? o.ll.join(",") : (o.addr || o.name));
+const embedUrl = (o, z) => "https://www.google.com/maps?hl=ja&output=embed&z=" + z + "&q=" + encodeURIComponent(o.ll ? o.ll.join(",") : [o.name, o.addr].filter(Boolean).join(" "));
 const hhmm = ts => ts ? new Date(ts).toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}) : "";
 const nm = n => n || "だれか";
 const cmtsOf = id => comments.filter(c => c.spot === id);
@@ -352,7 +363,7 @@ function renderDest(){
       ${dest.addr && dest.addr !== dest.name ? `<div class="sub2">${esc(dest.addr)}</div>` : ""}
       <div class="acts"><a class="btn small" target="_blank" rel="noopener" href="${esc(gmapUrl(dest))}">Googleマップで開く</a></div>
     </div>${focusBar(f)}
-    <iframe id="destMap" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${src}" title="地図"></iframe></div>`;
+    <iframe id="destMap" src="${src}" title="地図" allowfullscreen></iframe></div>`;
 }
 const focusBar = f => f ? `<div class="focusbar" id="focusbar"><b>📍 ${esc(f.name)}</b><button class="btn small" data-act="unfocus">目的地に戻す</button></div>` : `<div id="focusbar" hidden></div>`;
 
@@ -375,6 +386,7 @@ function card(o){
     <div class="top"><div class="t">
       <h3><span class="tag" style="background:${typeColor(o.type)}">${esc(o.type)}</span>${esc(o.name)}</h3>
       ${o.desc ? `<div class="desc">${esc(o.desc)}</div>` : ""}
+      ${!open && texts.length ? `<div class="peek">${texts.slice(-2).map(c => `<div class="cmt">💬 <b>${esc(nm(c.name))}</b>：${esc(c.text)}</div>`).join("")}${texts.length > 2 ? `<div class="note">ほか${texts.length - 2}件</div>` : ""}</div>` : ""}
       ${who ? `<div class="who">${who}</div>` : ""}
     </div><span class="chev">${open ? "▲" : "▼"}</span></div>
     <div class="reacts">
@@ -468,7 +480,7 @@ const needName = () => { if (me) return true; askName(true); return false; };
 function splitPaste(s){
   const m = (s || "").match(/https?:\/\/\S+/);
   if (!m) return {url:"", name:s.trim()};
-  let name = s.replace(m[0], "").replace(/[\n\r]+/g, " ").trim();
+  let name = s.replace(m[0], "").split(/[\n\r]+|\s[·・|]\s/)[0].trim();
   if (!name){ const p = m[0].match(/\/maps\/place\/([^/@?]+)/); if (p) name = decodeURIComponent(p[1].replace(/\+/g, " ")); }
   return {url:m[0], name};
 }
@@ -512,9 +524,17 @@ function spotDialog(o){
 function cmtDialog(id){
   const o = spots.find(s => s.id === id); if (!o) return;
   openDialog(`<h2>💬 ${esc(o.name)}</h2><textarea name="text" maxlength="300" placeholder="例：ここ最高！／ちょっとしょぼかった" required></textarea>`,
-    fd => fd.text ? api({sheet:"コメント", action:"append", row:{"スポットID":id, "名前":me, "コメント":fd.text}}).then(() => toast("送りました")) : warn("ひとこと書いてね"));
+    fd => { if (!fd.text) return warn("ひとこと書いてね");
+      $("#dlg").close();
+      api({sheet:"コメント", action:"append", row:{"スポットID":id, "名前":me, "コメント":fd.text}})
+        .catch(() => alert("ひとことを送れませんでした。電波を確認してもう一度送ってください。"));
+    });
 }
+const busy = new Set();   // 送信中は同じボタンを受け付けない（二重に記録されるのを防ぐ）
 async function toggle(id, key){
+  const k = id + key;
+  if (busy.has(k)) return;
+  busy.add(k);
   const mine = mineOf(id, key);
   try{
     if (mine.length) await Promise.all(mine.map(c => api({sheet:"コメント", action:"update", id:c.id, row:{"表示":"非表示"}})));
@@ -524,6 +544,7 @@ async function toggle(id, key){
       toast(key === "want" ? "🙋 行きたい！" : "✅ 行った記録に残しました");
     }
   }catch(e){ alert("送れませんでした。電波を確認してもう一度押してください。"); }
+  finally{ busy.delete(k); }
 }
 async function setRow(sheet, id, row, done){
   try{ await api({sheet, action:"update", id, row}); toast(done); }
